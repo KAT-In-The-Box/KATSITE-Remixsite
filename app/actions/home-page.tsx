@@ -20,6 +20,7 @@ export interface HomePageProps {
 
 const BODY_FONT = "'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif"
 const DISPLAY_FONT = "'Pirata One', 'Space Grotesk', Georgia, serif"
+const BRAND_FONT = "'Oxanium', 'Space Grotesk', sans-serif"
 
 export function HomePage(handle: Handle<HomePageProps>) {
   return () => (
@@ -75,7 +76,7 @@ function HomeHead() {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Space+Grotesk:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Pirata+One&family=Space+Grotesk:wght@400;500;700&display=swap"
       />
     </>
   )
@@ -126,20 +127,60 @@ function SiteHeader() {
         <a
           href="/"
           aria-label="KaTBox Interactives home"
-          mix={css({ display: 'inline-flex', alignItems: 'center', flexShrink: 0 })}
+          mix={css({
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '10px',
+            flexShrink: 0,
+            minWidth: 0,
+            textDecoration: 'none',
+          })}
         >
           <img
-            src="/katbox-logo.png"
-            alt="KaTBox Interactives"
-            width="1400"
-            height="492"
+            src="/favicon.png"
+            alt=""
+            aria-hidden="true"
+            width="48"
+            height="48"
             mix={css({
               display: 'block',
-              height: '42px',
-              width: 'auto',
-              '@media (max-width: 560px)': { height: '34px' },
+              width: '38px',
+              height: '38px',
+              objectFit: 'contain',
+              flexShrink: 0,
+              '@media (max-width: 560px)': { width: '32px', height: '32px' },
             })}
           />
+          <span mix={css({ display: 'flex', flexDirection: 'column', lineHeight: 1 })}>
+            <span
+              mix={css({
+                fontFamily: BRAND_FONT,
+                fontSize: '23px',
+                fontWeight: 800,
+                letterSpacing: '-0.045em',
+                color: '#fff',
+                whiteSpace: 'nowrap',
+                '@media (max-width: 560px)': { fontSize: '19px' },
+              })}
+            >
+              KaTBox
+            </span>
+            <span
+              mix={css({
+                marginTop: '4px',
+                fontFamily: BODY_FONT,
+                fontSize: '8px',
+                fontWeight: 700,
+                letterSpacing: '0.2em',
+                color: 'var(--accent)',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+                '@media (max-width: 560px)': { fontSize: '7px', letterSpacing: '0.16em' },
+              })}
+            >
+              Interactives
+            </span>
+          </span>
         </a>
         <nav
           aria-label="Primary"
