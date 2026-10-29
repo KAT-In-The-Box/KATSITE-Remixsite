@@ -115,10 +115,10 @@ function SiteHeader() {
           gap: '24px',
           border: '1px solid rgba(169, 200, 232, 0.20)',
           borderRadius: '999px',
-          background: 'rgba(12, 17, 24, 0.78)',
-          boxShadow: '0 10px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.025)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018) 42%, rgba(117,158,204,.045)), rgba(9, 14, 22, 0.68)',
+          boxShadow: '0 14px 42px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(169,200,232,.07)',
+          backdropFilter: 'blur(24px) saturate(145%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(145%)',
           '@media (max-width: 560px)': {
             minHeight: '56px',
             padding: '7px 8px 7px 12px',
@@ -508,9 +508,12 @@ const card = css({
   display: 'flex',
   flexDirection: 'column',
   padding: '20px',
-  background: 'var(--surface)',
-  border: '1px solid var(--line)',
+  background: 'linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.012) 55%), rgba(14,20,29,.62)',
+  border: '1px solid rgba(195,218,245,.14)',
   borderRadius: '20px',
+  backdropFilter: 'blur(18px) saturate(135%)',
+  WebkitBackdropFilter: 'blur(18px) saturate(135%)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,.10), 0 12px 32px rgba(0,0,0,.16)',
 })
 
 function About() {
