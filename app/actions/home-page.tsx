@@ -46,6 +46,14 @@ export function HomePage(handle: Handle<HomePageProps>) {
           WebkitFontSmoothing: 'antialiased',
           '& a': { color: 'inherit' },
           '& :focus-visible': { outline: '2px solid var(--accent)', outlineOffset: '3px' },
+          '@keyframes katbox-pill-float': {
+            '0%, 100%': { transform: 'translate3d(var(--follow-x, 0px), var(--follow-y, 0px), 0) translateY(0px)' },
+            '50%': { transform: 'translate3d(var(--follow-x, 0px), var(--follow-y, 0px), 0) translateY(-5px)' },
+          },
+          '@keyframes katbox-pill-stroke': {
+            '0%': { '--stroke-angle': '0deg', '--particle-shift': '0px 0px' },
+            '100%': { '--stroke-angle': '360deg', '--particle-shift': '47px 31px' },
+          },
         })}
       >
         <SiteHeader />
@@ -103,7 +111,26 @@ function SiteHeader() {
       })}
     >
       <div
+        onMouseMove={(event: MouseEvent) => {
+          const pill = event.currentTarget as HTMLElement
+          const rect = pill.getBoundingClientRect()
+          const x = (event.clientX - rect.left) / rect.width - 0.5
+          const y = (event.clientY - rect.top) / rect.height - 0.5
+          pill.style.setProperty('--follow-x', `${x * 7}px`)
+          pill.style.setProperty('--follow-y', `${y * 4}px`)
+          pill.style.setProperty('--glow-x', `${((event.clientX - rect.left) / rect.width) * 100}%`)
+          pill.style.setProperty('--glow-y', `${((event.clientY - rect.top) / rect.height) * 100}%`)
+        }}
+        onMouseLeave={(event: MouseEvent) => {
+          const pill = event.currentTarget as HTMLElement
+          pill.style.setProperty('--follow-x', '0px')
+          pill.style.setProperty('--follow-y', '0px')
+          pill.style.setProperty('--glow-x', '50%')
+          pill.style.setProperty('--glow-y', '50%')
+        }}
         mix={css({
+          position: 'relative',
+          isolation: 'isolate',
           width: '100%',
           maxWidth: '1120px',
           minHeight: '64px',
@@ -113,12 +140,43 @@ function SiteHeader() {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '24px',
-          border: '1px solid rgba(169, 200, 232, 0.20)',
+          border: '1px solid transparent',
           borderRadius: '999px',
-          background: 'linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018) 42%, rgba(117,158,204,.045)), rgba(9, 14, 22, 0.68)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018) 42%, rgba(117,158,204,.045)) padding-box, conic-gradient(from var(--stroke-angle, 0deg), rgba(169,200,232,.24), rgba(255,255,255,.78), rgba(91,160,228,.72), rgba(255,255,255,.18), rgba(169,200,232,.24)) border-box, rgba(9,14,22,.72)',
           boxShadow: '0 14px 42px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(169,200,232,.07)',
           backdropFilter: 'blur(24px) saturate(145%)',
           WebkitBackdropFilter: 'blur(24px) saturate(145%)',
+          transform: 'translate3d(var(--follow-x, 0px), var(--follow-y, 0px), 0)',
+          animation: 'katbox-pill-float 5.5s ease-in-out infinite, katbox-pill-stroke 9s linear infinite',
+          transition: 'transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: '1px',
+            borderRadius: 'inherit',
+            background: 'radial-gradient(circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(169,200,232,.16), transparent 34%)',
+            pointerEvents: 'none',
+            zIndex: -1,
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            borderRadius: 'inherit',
+            pointerEvents: 'none',
+            opacity: .42,
+            backgroundImage: 'radial-gradient(circle, rgba(224,240,255,.9) 0.7px, transparent 1.5px), radial-gradient(circle, rgba(119,177,235,.8) 0.8px, transparent 1.7px)',
+            backgroundSize: '47px 31px, 71px 43px',
+            backgroundPosition: 'var(--particle-shift, 0px 0px), 18px 13px',
+            maskImage: 'linear-gradient(115deg, transparent 5%, black 38%, transparent 68%, black 94%)',
+            pointerEvents: 'none',
+          },
+          '&:hover': {
+            animationPlayState: 'paused',
+            boxShadow: '0 18px 48px rgba(0,0,0,.34), 0 0 24px rgba(116,171,230,.10), inset 0 1px 0 rgba(255,255,255,.22)',
+          },
+          '&:hover::after': { opacity: .72 },
+          '@media (prefers-reduced-motion: reduce)': { animation: 'none', transition: 'none' },
           '@media (max-width: 560px)': {
             minHeight: '56px',
             padding: '7px 8px 7px 12px',
