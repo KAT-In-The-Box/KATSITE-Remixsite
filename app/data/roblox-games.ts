@@ -69,11 +69,11 @@ export async function fetchRobloxGame(value: string): Promise<RobloxGameMetadata
   const placeId = getRobloxPlaceId(value)
   if (!placeId) throw new Error('Paste a valid Roblox experience URL, such as https://www.roblox.com/games/123456789.')
 
-  const placeRows = await robloxJson<RobloxPlaceDetails[]>(
-    `https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`,
+  // Resolve place IDs through Roblox's public endpoint; multiget-place-details requires cookie auth.
+  const universeResult = await robloxJson<{ universeId?: number }>(
+    `https://apis.roblox.com/universes/v1/places/${placeId}/universe`,
   )
-  const place = Array.isArray(placeRows) ? placeRows.find((row) => row.placeId === placeId) ?? placeRows[0] : undefined
-  const universeId = firstId(place?.universeId)
+  const universeId = firstId(universeResult.universeId)
   if (!universeId) throw new Error('Roblox did not return an experience ID. Check that the game URL is correct and publicly accessible.')
 
   const [gameResponse, iconResponse, bannerResponse] = await Promise.all([
@@ -88,10 +88,10 @@ export async function fetchRobloxGame(value: string): Promise<RobloxGameMetadata
   return {
     placeId,
     universeId,
-    name: game.name || place?.name || 'Untitled Roblox experience',
-    description: game.description || place?.description || '',
-    creatorName: game.creator?.name || place?.creator?.name || 'Unknown creator',
-    creatorType: game.creator?.type || place?.creator?.type || 'User',
+    name: game.name || 'Untitled Roblox experience',
+    description: game.description || '',
+    creatorName: game.creator?.name || 'Unknown creator',
+    creatorType: game.creator?.type || 'User',
     iconUrl,
     bannerUrl,
     playing: game.playing ?? 0,
