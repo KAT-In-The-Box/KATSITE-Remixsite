@@ -869,6 +869,93 @@ function SiteFooter() {
 }
 
 
+export function CareersPage() {
+  const benefits = [
+    { icon: '◎', title: 'Remote-first', body: 'Work from wherever you do your best work. We value clear communication, thoughtful collaboration, and making room for different locations.' },
+    { icon: '◷', title: 'Flexible work hours', body: 'Life doesn’t run on one schedule. We aim to coordinate around shared commitments while giving people room to manage their time responsibly.' },
+    { icon: '✧', title: 'Great benefits', body: 'We want people to feel supported, respected, and able to focus on doing great work. We’ll be transparent about any role-specific compensation and benefits.' },
+    { icon: '☕', title: 'A sustainable pace', body: 'We aim to plan realistically and avoid crunch wherever possible. Healthy work habits help us create better games over the long term.' },
+    { icon: '◇', title: 'An inclusive team', body: 'Different backgrounds and perspectives lead to stronger ideas. Everyone should have room to contribute, learn, and grow.' },
+    { icon: '⌁', title: 'Learn from play', body: 'Playtesting helps us learn. Share feedback, test ideas, and help shape experiences for the players who enjoy them.' },
+  ]
+  return () => (
+    <Document head={<HomeHead />} title="Careers | KaTBox Interactives">
+      <div mix={css({
+        '--bg': '#05070b', '--line': 'rgba(190,211,235,.15)', '--ink': '#f8fbff',
+        '--muted': '#aab5c3', '--accent': '#a9c8e8',
+        '& *, & *::before, & *::after': { boxSizing: 'border-box' },
+        minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)',
+        fontFamily: BODY_FONT, fontSize: '16px', lineHeight: 1.65,
+        WebkitFontSmoothing: 'antialiased', '& a': { color: 'inherit' },
+        '& :focus-visible': { outline: '2px solid var(--accent)', outlineOffset: '3px' },
+      })}>
+        <SiteHeader />
+        <main>
+          <section mix={css({
+            position: 'relative', isolation: 'isolate', overflow: 'hidden',
+            padding: 'clamp(76px, 12vw, 142px) 24px 84px',
+            borderBottom: '1px solid var(--line)',
+            background: 'radial-gradient(ellipse at 80% 15%, rgba(125,170,220,.17), transparent 38%), radial-gradient(ellipse at 12% 60%, rgba(92,128,175,.10), transparent 42%), linear-gradient(180deg, rgba(7,12,20,.4), #05070b 96%)',
+            '&::before': { content: '""', position: 'absolute', inset: 0, zIndex: -1, opacity: .17, backgroundImage: 'radial-gradient(circle, rgba(210,230,255,.9) .7px, transparent 1.5px)', backgroundSize: '37px 37px', maskImage: 'linear-gradient(135deg, black, transparent 70%)' },
+          })}>
+            <div mix={css({ width: '100%', maxWidth: '1120px', margin: '0 auto' })}>
+              <a href="/" mix={css({ display: 'inline-block', marginBottom: '34px', color: 'var(--muted)', fontSize: '12px', textDecoration: 'none' })}>← Back to KaTBox</a>
+              <p mix={css({ margin: '0 0 15px', color: 'var(--accent)', fontSize: '11px', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase' })}>Careers at KaTBox</p>
+              <h1 mix={css({ maxWidth: '850px', margin: 0, fontFamily: DISPLAY_FONT, fontWeight: 400, fontSize: 'clamp(54px, 9vw, 100px)', lineHeight: '.98' })}>Make your next world <span mix={css({ color: 'var(--accent)' })}>with us.</span></h1>
+              <p mix={css({ maxWidth: '650px', margin: '25px 0 28px', color: 'var(--muted)', fontSize: 'clamp(16px, 2vw, 19px)' })}>We’re a Roblox-focused game studio built around creativity, collaboration, and the belief that great experiences come from great teams.</p>
+              <div mix={css({ display: 'flex', flexWrap: 'wrap', gap: '12px' })}>
+                <a href="#benefits" mix={css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: '47px', padding: '0 21px', borderRadius: '999px', background: 'var(--accent)', color: '#080d14', fontSize: '12px', fontWeight: 700, textDecoration: 'none' })}>Explore our culture ↓</a>
+                <a href="#apply" mix={css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: '47px', padding: '0 21px', borderRadius: '999px', border: '1px solid var(--line)', background: 'rgba(255,255,255,.035)', fontSize: '12px', fontWeight: 700, textDecoration: 'none' })}>Work with us ↗</a>
+              </div>
+              <div mix={css({ display: 'flex', flexWrap: 'wrap', gap: '9px', marginTop: '42px' })}>
+                {['Remote-friendly', 'Creative ownership', 'Player-first thinking'].map((label) => <span key={label} mix={css({ padding: '7px 12px', border: '1px solid var(--line)', borderRadius: '999px', background: 'rgba(12,18,28,.55)', color: '#c4d2e3', fontSize: '11px' })}>{label}</span>)}
+              </div>
+            </div>
+          </section>
+          <section id="benefits" mix={css({ width: '100%', maxWidth: '1168px', margin: '0 auto', padding: '82px 24px 94px' })}>
+            <div mix={css({ maxWidth: '700px', marginBottom: '36px' })}>
+              <p mix={css({ margin: '0 0 10px', color: 'var(--accent)', fontSize: '11px', fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase' })}>The way we work</p>
+              <h2 mix={css({ margin: 0, fontFamily: DISPLAY_FONT, fontSize: 'clamp(38px, 5vw, 58px)', lineHeight: 1.05, fontWeight: 400 })}>Good work starts with a good team.</h2>
+              <p mix={css({ margin: '15px 0 0', color: 'var(--muted)', fontSize: '15px' })}>We want people to do their best work without having to sacrifice the rest of their lives to do it.</p>
+            </div>
+            <div mix={css({ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px', '@media (max-width: 760px)': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }, '@media (max-width: 520px)': { gridTemplateColumns: 'minmax(0, 1fr)' } })}>
+              {benefits.map((item) => <article key={item.title} mix={css({
+                minHeight: '250px', padding: '24px 22px', border: '1px solid var(--line)', borderRadius: '19px',
+                background: 'linear-gradient(145deg, rgba(23,32,45,.78), rgba(9,13,20,.9))',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,.035)',
+                transition: 'transform 180ms ease, border-color 180ms ease',
+                '&:hover': { transform: 'translateY(-3px)', borderColor: 'rgba(169,200,232,.38)' },
+              })}>
+                <div aria-hidden="true" mix={css({ display: 'grid', placeItems: 'center', width: '57px', height: '57px', marginBottom: '24px', borderRadius: '16px', border: '1px solid rgba(169,200,232,.18)', background: 'rgba(169,200,232,.07)', color: 'var(--accent)', fontSize: '32px', lineHeight: 1 })}>{item.icon}</div>
+                <h3 mix={css({ margin: '0 0 10px', fontSize: '18px', lineHeight: 1.25, letterSpacing: '-.025em' })}>{item.title}</h3>
+                <p mix={css({ margin: 0, color: 'var(--muted)', fontSize: '13px', lineHeight: 1.75 })}>{item.body}</p>
+              </article>)}
+            </div>
+          </section>
+          <section mix={css({ padding: '0 24px 94px' })}>
+            <div mix={css({ width: '100%', maxWidth: '1120px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, .85fr) minmax(0, 1.15fr)', gap: '32px', alignItems: 'start', padding: 'clamp(24px, 5vw, 46px)', border: '1px solid var(--line)', borderRadius: '24px', background: 'radial-gradient(ellipse at 0% 0%, rgba(169,200,232,.09), transparent 55%), rgba(13,18,27,.78)', '@media (max-width: 720px)': { gridTemplateColumns: 'minmax(0, 1fr)' } })}>
+              <div><p mix={css({ margin: '0 0 10px', color: 'var(--accent)', fontSize: '11px', fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase' })}>Our mindset</p><h2 mix={css({ margin: 0, fontFamily: DISPLAY_FONT, fontWeight: 400, fontSize: 'clamp(38px, 5vw, 56px)', lineHeight: 1.04 })}>Curiosity over ego.</h2><p mix={css({ margin: '16px 0 0', color: 'var(--muted)', fontSize: '14px' })}>You don’t need to know everything. Bring your ideas, be open to feedback, and care about making the experience better for players and teammates.</p></div>
+              <div mix={css({ display: 'grid', gap: '10px' })}>
+                {[['01', 'Make things together', 'Share progress early, ask questions, and help unblock one another.'], ['02', 'Keep players in mind', 'Make decisions with the people playing our experiences in mind.'], ['03', 'Keep getting better', 'Treat feedback and playtests as a way to improve, not personal criticism.']].map(([number, title, body]) => <div key={number} mix={css({ display: 'grid', gridTemplateColumns: '38px minmax(0, 1fr)', gap: '13px', padding: '15px 0', borderBottom: '1px solid var(--line)' })}><span mix={css({ color: 'var(--accent)', fontSize: '12px', fontWeight: 700 })}>{number}</span><div><h3 mix={css({ margin: '0 0 4px', fontSize: '14px' })}>{title}</h3><p mix={css({ margin: 0, color: 'var(--muted)', fontSize: '12px' })}>{body}</p></div></div>)}
+              </div>
+            </div>
+          </section>
+          <section id="apply" mix={css({ width: '100%', maxWidth: '1120px', margin: '0 auto', padding: '0 24px 110px' })}>
+            <div mix={css({ padding: 'clamp(28px, 6vw, 58px)', borderRadius: '24px', border: '1px solid rgba(169,200,232,.28)', background: 'linear-gradient(120deg, rgba(169,200,232,.10), rgba(11,16,24,.94) 65%), #0b1018', textAlign: 'center' })}>
+              <p mix={css({ margin: '0 0 12px', color: 'var(--accent)', fontSize: '11px', fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase' })}>Come build with us</p>
+              <h2 mix={css({ maxWidth: '700px', margin: '0 auto', fontFamily: DISPLAY_FONT, fontWeight: 400, fontSize: 'clamp(42px, 7vw, 72px)', lineHeight: 1.02 })}>Have something to bring to the table?</h2>
+              <p mix={css({ maxWidth: '600px', margin: '18px auto 26px', color: 'var(--muted)', fontSize: '14px' })}>We’re interested in meeting thoughtful creators and developers. Tell us what you do, what you’d like to make, and share a portfolio or examples of your work.</p>
+              <a href="/#contact" mix={css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: '48px', padding: '0 22px', borderRadius: '999px', background: 'var(--accent)', color: '#080d14', fontSize: '12px', fontWeight: 700, textDecoration: 'none' })}>Introduce yourself ↗</a>
+              <p mix={css({ margin: '16px 0 0', color: '#78889d', fontSize: '11px' })}>No open roles are listed here yet. Use the contact form to express interest.</p>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+    </Document>
+  )
+}
+
 export function GamesPage(handle: Handle<{ managedGames?: ManagedGame[] }>) {
   return () => {
     const games = (handle.props.managedGames ?? []).filter((game) => game.status !== 'Archived')
