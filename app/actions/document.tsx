@@ -46,6 +46,7 @@ export function Document(handle: Handle<DocumentProps>) {
                     const moveY = (y - 0.5) * 24;
                     cancelAnimationFrame(frame);
                     frame = requestAnimationFrame(() => {
+                      pill.style.animation = 'none';
                       pill.style.animationPlayState = 'paused';
                       pill.style.transform = 'translate3d(' + moveX.toFixed(1) + 'px, ' + moveY.toFixed(1) + 'px, 0)';
                       pill.style.setProperty('--glow-x', (x * 100).toFixed(1) + '%');
@@ -57,6 +58,7 @@ export function Document(handle: Handle<DocumentProps>) {
                     pill.style.transform = 'translate3d(0, 0, 0)';
                     pill.style.setProperty('--glow-x', '50%');
                     pill.style.setProperty('--glow-y', '50%');
+                    pill.style.animation = 'katbox-pill-float 6s ease-in-out infinite';
                     pill.style.animationPlayState = '';
                   };
                   pill.addEventListener('pointermove', onMove);
