@@ -7,7 +7,7 @@ import { beginRobloxLogin, endStaffSession, finishRobloxLogin, getStaffSession }
 import { createManagedGame, deleteManagedGame, hasDb, listManagedGames, pingDb, saveContactMessage, updateManagedGameMetadata, updateManagedGameStatus, setFeaturedManagedGame, type GameStatus } from '../data/mongo.ts'
 import { fetchRobloxGame } from '../data/roblox-games.ts'
 import { routes } from '../routes.ts'
-import { HomePage, type ContactValues } from './home-page.tsx'
+import { GamesPage, HomePage, type ContactValues } from './home-page.tsx'
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -148,6 +148,18 @@ export default createController(routes, {
         console.error('Failed to load public game list:', error)
       }
       return context.render(<HomePage bladesOfChanceUrl={config.bladesOfChanceUrl} managedGames={games} sent={sent} />)
+    },
+
+    async games(context) {
+      let games = []
+      try {
+        games = await listManagedGames()
+        // Only display active portfolio entries; the staff portal retains paused and archived records.
+        games = games.filter((game) => game.status !== 'Paused' && game.status !== 'Archived')
+      } catch (error) {
+        console.error('Failed to load public game portfolio:', error)
+      }
+      return context.render(<GamesPage managedGames={games} />)
     },
 
     async health() {
