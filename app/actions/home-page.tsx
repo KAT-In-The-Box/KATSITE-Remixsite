@@ -90,20 +90,44 @@ const wrap = css({
 
 function SiteHeader() {
   return () => (
-    <header mix={css({ borderBottom: '1px solid var(--line)', background: 'var(--bg)' })}>
+    <header
+      mix={css({
+        position: 'relative',
+        zIndex: 10,
+        padding: '18px 24px 0',
+        background: 'transparent',
+        '@media (max-width: 560px)': { padding: '12px 12px 0' },
+      })}
+    >
       <div
-        mix={[
-          wrap,
-          css({
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-            minHeight: '88px',
-          }),
-        ]}
+        mix={css({
+          width: '100%',
+          maxWidth: '1120px',
+          minHeight: '64px',
+          margin: '0 auto',
+          padding: '8px 10px 8px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '24px',
+          border: '1px solid rgba(207, 144, 102, 0.25)',
+          borderRadius: '999px',
+          background: 'rgba(16, 12, 10, 0.94)',
+          boxShadow: '0 10px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.025)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          '@media (max-width: 560px)': {
+            minHeight: '56px',
+            padding: '7px 8px 7px 12px',
+            gap: '8px',
+          },
+        })}
       >
-        <a href="/" aria-label="KaTBox Interactives home" mix={css({ display: 'block' })}>
+        <a
+          href="/"
+          aria-label="KaTBox Interactives home"
+          mix={css({ display: 'inline-flex', alignItems: 'center', flexShrink: 0 })}
+        >
           <img
             src="/katbox-logo.png"
             alt="KaTBox Interactives"
@@ -111,9 +135,9 @@ function SiteHeader() {
             height="492"
             mix={css({
               display: 'block',
-              height: '64px',
+              height: '42px',
               width: 'auto',
-              '@media (max-width: 560px)': { height: '48px' },
+              '@media (max-width: 560px)': { height: '34px' },
             })}
           />
         </a>
@@ -122,25 +146,48 @@ function SiteHeader() {
           mix={css({
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'flex-end',
             gap: '4px',
+            minWidth: 0,
             '& a': {
               display: 'inline-flex',
               alignItems: 'center',
-              minHeight: '44px',
-              padding: '0 14px',
+              justifyContent: 'center',
+              minHeight: '42px',
+              padding: '0 13px',
               color: 'var(--muted)',
               textDecoration: 'none',
-              fontSize: '15px',
-              fontWeight: 500,
-              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+              borderRadius: '999px',
+              transition: 'color 160ms ease, background 160ms ease, border-color 160ms ease',
+              '@media (max-width: 560px)': {
+                minHeight: '36px',
+                padding: '0 8px',
+                fontSize: '10px',
+                letterSpacing: '0.04em',
+              },
             },
-            '& a:hover': { color: 'var(--ink)' },
+            '& a:hover': { color: 'var(--ink)', background: 'rgba(255, 255, 255, 0.045)' },
+            '& a.nav-cta': {
+              minHeight: '42px',
+              padding: '0 18px',
+              color: '#160d08',
+              background: 'var(--accent)',
+              border: '1px solid rgba(255, 218, 190, 0.16)',
+              fontWeight: 700,
+              '@media (max-width: 560px)': { minHeight: '36px', padding: '0 11px', fontSize: '9px' },
+            },
+            '& a.nav-cta:hover': { color: '#160d08', background: '#e0a27a' },
             '@media (max-width: 560px)': { '& a.hide-sm': { display: 'none' } },
           })}
         >
           <a href="#games" class="hide-sm">Games</a>
           <a href="#about" class="hide-sm">About</a>
-          <a href="#contact">Contact</a>
+          <a href="#contact" class="nav-cta">Get in touch <span aria-hidden="true" mix={css({ marginLeft: '7px', fontSize: '15px', lineHeight: 1 })}>↗</span></a>
         </nav>
       </div>
     </header>
