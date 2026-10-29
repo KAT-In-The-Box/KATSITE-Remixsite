@@ -7,7 +7,7 @@ import { beginRobloxLogin, endStaffSession, finishRobloxLogin, getStaffSession }
 import { createManagedGame, deleteManagedGame, hasDb, listManagedGames, pingDb, saveContactMessage, updateManagedGameMetadata, updateManagedGameStatus, setFeaturedManagedGame, type GameStatus } from '../data/mongo.ts'
 import { fetchRobloxGame } from '../data/roblox-games.ts'
 import { routes } from '../routes.ts'
-import { GamesPage, HomePage, type ContactValues } from './home-page.tsx'
+import { CareersPage, GamesPage, HomePage, type ContactValues } from './home-page.tsx'
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -148,6 +148,10 @@ export default createController(routes, {
         console.error('Failed to load public game list:', error)
       }
       return context.render(<HomePage bladesOfChanceUrl={config.bladesOfChanceUrl} managedGames={games} sent={sent} />)
+    },
+
+    careers(context) {
+      return context.render(<CareersPage />)
     },
 
     async games(context) {
