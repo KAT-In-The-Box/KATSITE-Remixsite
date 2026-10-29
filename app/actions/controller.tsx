@@ -94,6 +94,7 @@ function gameManagerPage(name: string, games: Awaited<ReturnType<typeof listMana
     return ao - bo || a.name.localeCompare(b.name)
   })
   const featuredGames = sorted.filter((game) => game.featuredOrder != null || game.featured).sort((a, b) => (a.featuredOrder ?? 99) - (b.featuredOrder ?? 99)).slice(0, 3).map((game, index) => game.featuredOrder == null ? { ...game, featuredOrder: index + 1 } : game)
+  const previewGame = featuredGames[0] ?? sorted.find((game) => game.status !== 'Archived') ?? sorted[0]
   const featureCard = (game: typeof sorted[number], slot: number) => {
     const id = escapeHtml(String(game._id ?? ''))
     const icon = ''
