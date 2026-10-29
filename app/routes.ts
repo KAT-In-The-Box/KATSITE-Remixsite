@@ -5,4 +5,8 @@ export const routes = route({
   home: '/',
   health: get('/health'),
   contact: { method: 'POST', pattern: '/contact' },
+  robloxLogin: get('/auth/roblox/login'),
+  robloxCallback: get('/auth/roblox/callback'),
+  staff: get('/staff'),
+  staffLogout: { method: 'POST', pattern: '/auth/roblox/logout' },
 })
