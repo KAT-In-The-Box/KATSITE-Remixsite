@@ -373,7 +373,7 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: Manag
     const url = handle.props.bladesOfChanceUrl
     const managedGames = (handle.props.managedGames ?? []).filter((game) => game.status !== 'Archived' && game.status !== 'Paused')
     const featured = managedGames.find((game) => game.featured) ?? managedGames[0]
-    const moreGames = managedGames.slice(1)
+    const moreGames = managedGames.slice(1, 4)
     const gameStats = (game: ManagedGame) => [
       { label: 'Playing', value: formatGameNumber(game.playing ?? 0) },
       { label: 'Visits', value: formatGameNumber(game.visits ?? 0) },
@@ -421,7 +421,7 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: Manag
               <div>
                 <div mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '14px' })}>
                   <h3 mix={css({ margin: 0, fontSize: '20px' })}>More experiences</h3>
-                  <span mix={css({ color: 'var(--muted)', fontSize: '11px' })}>{moreGames.length} more</span>
+                  <span mix={css({ color: 'var(--muted)', fontSize: '11px' })}>{managedGames.length - 1} total</span>
                 </div>
                 <div mix={css({ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '14px', '@media (max-width: 760px)': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }, '@media (max-width: 430px)': { gridTemplateColumns: 'minmax(0, 1fr)' } })}>
                   {moreGames.map((game) => (
@@ -438,6 +438,11 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: Manag
                     </article>
                   ))}
                 </div>
+              </div>
+            ) : null}
+            {managedGames.length > 1 ? (
+              <div mix={css({ display: 'flex', justifyContent: 'center', marginTop: '26px' })}>
+                <a href="/games" mix={css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: '46px', padding: '0 22px', border: '1px solid rgba(207,144,102,.45)', borderRadius: '999px', color: 'var(--ink)', fontSize: '12px', fontWeight: 700, textDecoration: 'none', transition: 'background 160ms ease', '&:hover': { background: 'rgba(207,144,102,.12)' } })}>Explore all games ↗</a>
               </div>
             ) : null}
           </>
