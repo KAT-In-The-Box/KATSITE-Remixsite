@@ -371,7 +371,7 @@ function formatGameDate(value: string): string {
 function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: ManagedGame[] }>) {
   return () => {
     const url = handle.props.bladesOfChanceUrl
-    const managedGames = (handle.props.managedGames ?? []).filter((game) => game.status !== 'Archived' && game.status !== 'Paused')
+    const managedGames = (handle.props.managedGames ?? []).filter((game) => game.status !== 'Archived')
     const featured = managedGames.find((game) => game.featured) ?? managedGames[0]
     const moreGames = managedGames.filter((game) => game !== featured).slice(0, 3)
     const gameStats = (game: ManagedGame) => [
