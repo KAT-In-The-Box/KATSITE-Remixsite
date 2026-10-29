@@ -334,7 +334,7 @@ export default createController(routes, {
     staff(context) {
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
-      return staffPage(user.name)
+      return createRedirectResponse('/staff/games', { status: 303 })
     },
 
     staffLogout(context) {
