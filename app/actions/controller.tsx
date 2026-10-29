@@ -62,14 +62,14 @@ a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible{outlin
 <section class="statusbar" aria-label="Account status"><span class="status-dot" aria-hidden="true"></span><div><strong>Roblox account verified</strong><p>Your account is approved for the KaTBox staff portal.</p></div><span class="status-label">Access active</span></section>
 <div class="section-head" id="tools"><div><h2>Your workspace</h2><p>Quick access to staff areas and studio systems.</p></div><span class="section-kicker">01 / Overview</span></div>
 <div class="cards">
-<a class="card" href="#game-manager"><div class="card-top"><div class="icon-box" aria-hidden="true">⌘</div><span class="tag"><span class="tiny-dot"></span>In development</span></div><h3>Game Manager</h3><p>Manage connected Roblox experiences, review game details, and access studio controls.</p><span class="card-link">Explore workspace <span aria-hidden="true">→</span></span></a>
-<a class="card" href="#team"><div class="card-top"><div class="icon-box" aria-hidden="true">♙</div><span class="tag">Staff area</span></div><h3>Team &amp; access</h3><p>A future home for team roles, staff access, and permission management.</p><span class="card-link">View team area <span aria-hidden="true">→</span></span></a>
-<a class="card" href="#integrations"><div class="card-top"><div class="icon-box" aria-hidden="true">↗</div><span class="tag">Integrations</span></div><h3>Connected services</h3><p>Keep Roblox and other studio integrations organized as tools are connected.</p><span class="card-link">View integrations <span aria-hidden="true">→</span></span></a>
+<a class="card" href="/staff/games"><div class="card-top"><div class="icon-box" aria-hidden="true">⌘</div><span class="tag"><span class="tiny-dot"></span>Available</span></div><h3>Game Manager</h3><p>Add Roblox experiences, manage their status, and keep your studio game list in one place.</p><span class="card-link">Open Game Manager <span aria-hidden="true">→</span></span></a>
+<a class="card" href="/staff/games"><div class="card-top"><div class="icon-box" aria-hidden="true">♙</div><span class="tag">Staff area</span></div><h3>Team &amp; access</h3><p>A future home for team roles, staff access, and permission management.</p><span class="card-link">View team area <span aria-hidden="true">→</span></span></a>
+<a class="card" href="/staff/games"><div class="card-top"><div class="icon-box" aria-hidden="true">↗</div><span class="tag">Integrations</span></div><h3>Connected services</h3><p>Keep Roblox and other studio integrations organized as tools are connected.</p><span class="card-link">View integrations <span aria-hidden="true">→</span></span></a>
 </div>
 <div class="lower-grid">
 <section class="panel"><h2>Workspace activity</h2><p class="panel-sub">A snapshot of what’s currently available in the portal.</p>
 <div class="activity-row"><div class="activity-icon" aria-hidden="true">✓</div><div><strong>Roblox authentication</strong><p>Sign-in and staff allowlist checks are enabled.</p></div><span class="activity-state">Active</span></div>
-<div class="activity-row"><div class="activity-icon" aria-hidden="true">◈</div><div><strong>Game Manager</strong><p>Interface and Roblox actions still need to be built.</p></div><span class="activity-state">Planned</span></div>
+<div class="activity-row"><div class="activity-icon" aria-hidden="true">◈</div><div><strong>Game Manager</strong><p>Manage the experiences listed in your staff workspace.</p></div><span class="activity-state">Available</span></div>
 <div class="activity-row"><div class="activity-icon" aria-hidden="true">⚙</div><div><strong>Studio integrations</strong><p>More services can be connected as needed.</p></div><span class="activity-state">Planned</span></div>
 </section>
 <section class="panel" id="account"><h2>Account &amp; security</h2><p class="panel-sub">Your current portal access.</p>
@@ -140,6 +140,81 @@ export default createController(routes, {
 
     async robloxCallback(context) {
       return finishRobloxLogin(context.request)
+    },
+
+    async gameManager(context) {
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      let games = []
+      let message = ''
+      try {
+        games = await listManagedGames()
+      } catch (error) {
+        console.error('Failed to load managed games:', error)
+        message = 'Could not load the game list. Check the database connection and try again.'
+      }
+      return gameManagerPage(user.name, games, message)
+    },
+
+    async gameCreate(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const form = context.formData
+      const name = readText(form, 'name')
+      const placeUrl = readText(form, 'placeUrl')
+      const description = readText(form, 'description')
+      const status = readText(form, 'status') as GameStatus
+      const allowedStatuses: GameStatus[] = ['In development', 'Live', 'Paused', 'Archived']
+      let message = ''
+      if (!name || name.length > 80) message = 'Enter a game name between 1 and 80 characters.'
+      else if (description.length > 500) message = 'Description must be 500 characters or fewer.'
+      else if (!/^https:\/\/(www\.)?roblox\.com\/games\/\d+/i.test(placeUrl)) message = 'Enter a valid Roblox game URL, such as https://www.roblox.com/games/123456789.'
+      else if (!allowedStatuses.includes(status)) message = 'Choose a valid game status.'
+      if (!message) {
+        try {
+          await createManagedGame({ name, placeUrl, description, status })
+          message = 'Game added to your workspace.'
+        } catch (error) {
+          console.error('Failed to create managed game:', error)
+          message = 'Could not save the game. Make sure MongoDB is configured and connected.'
+        }
+      }
+      let games = []
+      try { games = await listManagedGames() } catch { /* Show the form and actionable error. */ }
+      return gameManagerPage(user.name, games, message)
+    },
+
+    async gameStatus(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const form = context.formData
+      const id = readText(form, 'id')
+      const status = readText(form, 'status') as GameStatus
+      const allowedStatuses: GameStatus[] = ['In development', 'Live', 'Paused', 'Archived']
+      let message = ''
+      if (!allowedStatuses.includes(status)) message = 'Choose a valid game status.'
+      else {
+        try { await updateManagedGameStatus(id, status); message = 'Game status updated.' }
+        catch (error) { console.error('Failed to update game status:', error); message = 'Could not update this game. Check the database connection and try again.' }
+      }
+      let games = []
+      try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
+      return gameManagerPage(user.name, games, message)
+    },
+
+    async gameDelete(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const id = readText(context.formData, 'id')
+      let message = ''
+      try { await deleteManagedGame(id); message = 'Game removed from your workspace.' }
+      catch (error) { console.error('Failed to delete managed game:', error); message = 'Could not delete this game. Check the database connection and try again.' }
+      let games = []
+      try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
+      return gameManagerPage(user.name, games, message)
     },
 
     staff(context) {
