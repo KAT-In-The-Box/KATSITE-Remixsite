@@ -14,6 +14,7 @@ export const routes = route({
   gameCreate: { method: 'POST', pattern: '/staff/games/create' },
   gameStatus: { method: 'POST', pattern: '/staff/games/status' },
   gameFeature: { method: 'POST', pattern: '/staff/games/feature' },
+  gameReorder: { method: 'POST', pattern: '/staff/games/reorder' },
   gameRefresh: { method: 'POST', pattern: '/staff/games/refresh' },
   gameDelete: { method: 'POST', pattern: '/staff/games/delete' },
   staffLogout: { method: 'POST', pattern: '/auth/roblox/logout' },
