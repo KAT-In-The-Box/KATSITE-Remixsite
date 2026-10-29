@@ -242,14 +242,25 @@ function Hero() {
       mix={[
         wrap,
         css({
+          position: 'relative',
+          isolation: 'isolate',
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)',
+          gridTemplateColumns: 'minmax(0, 1fr)',
           alignItems: 'center',
-          gap: '40px',
-          padding: '80px 24px 88px',
+          justifyItems: 'center',
+          gap: '32px',
+          width: '100%',
+          maxWidth: 'none',
+          minHeight: 'min(820px, calc(100svh - 92px))',
+          padding: '110px 24px 120px',
+          textAlign: 'center',
+          overflow: 'hidden',
+          borderBottom: '1px solid var(--line)',
+          background: 'radial-gradient(ellipse at 24% 48%, rgba(115, 88, 54, .26), transparent 48%), radial-gradient(ellipse at 76% 52%, rgba(64, 86, 94, .17), transparent 42%), #050505',
           '@media (max-width: 860px)': {
             gridTemplateColumns: 'minmax(0, 1fr)',
-            padding: '48px 24px 64px',
+            minHeight: '700px',
+            padding: '90px 20px 100px',
           },
         }),
       ]}
@@ -271,19 +282,23 @@ function Hero() {
           mix={css({
             margin: 0,
             fontFamily: DISPLAY_FONT,
-            fontSize: 'clamp(48px, 8vw, 96px)',
+            fontSize: 'clamp(56px, 9vw, 118px)',
             lineHeight: 1,
             fontWeight: 400,
-            letterSpacing: '0.01em',
+            letterSpacing: '0.005em',
+            maxWidth: '1100px',
+            margin: '0 auto',
+            textWrap: 'balance',
+            textShadow: '0 4px 32px rgba(0,0,0,.5)',
           })}
         >
           Games worth climbing into.
         </h1>
-        <p mix={css({ margin: '28px 0 0', maxWidth: '50ch', fontSize: '20px', color: 'var(--muted)' })}>
+        <p mix={css({ margin: '24px auto 0', maxWidth: '760px', fontSize: 'clamp(16px, 1.8vw, 21px)', color: '#e0dfdc', textShadow: '0 2px 16px rgba(0,0,0,.8)' })}>
           KaTBox Interactive makes games under the Roblox Metaverse, from the first prototype through live
           updates.
         </p>
-        <div mix={css({ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '40px' })}>
+        <div mix={css({ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '14px', marginTop: '36px' })}>
           <a href="#games" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}>
             See our games
           </a>
@@ -292,20 +307,40 @@ function Hero() {
           </a>
         </div>
       </div>
-      <img
-        src="/katbox-mascot.png"
-        alt="The KaTBox mascot: a cat in sunglasses sitting in a cardboard box"
-        width="900"
-        height="981"
+      <video
+        aria-hidden="true"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        poster="/katbox-mascot.png"
         mix={css({
-          display: 'block',
-          width: '100%',
-          maxWidth: '420px',
-          height: 'auto',
-          justifySelf: 'center',
-          '@media (max-width: 860px)': { maxWidth: '260px', justifySelf: 'start' },
+          position: 'absolute',
+          zIndex: -1,
+          right: '-2%',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 'min(68vw, 1000px)',
+          height: '100%',
+          objectFit: 'contain',
+          objectPosition: 'right center',
+          opacity: '.88',
+          pointerEvents: 'none',
+          mixBlendMode: 'screen',
+          '@media (max-width: 760px)': { right: '-18%', width: '100%', opacity: '.42', objectPosition: 'center' },
         })}
-      />
+      >
+        <source src="/hero-transparent.webm" type="video/webm" />
+      </video>
+      <div aria-hidden="true" mix={css({
+        position: 'absolute',
+        zIndex: -1,
+        inset: 0,
+        background: 'linear-gradient(90deg, rgba(0,0,0,.40) 0%, rgba(0,0,0,.30) 46%, rgba(0,0,0,.08) 100%)',
+        pointerEvents: 'none',
+        '@media (max-width: 760px)': { background: 'rgba(0,0,0,.38)' },
+      })} />
     </section>
   )
 }
