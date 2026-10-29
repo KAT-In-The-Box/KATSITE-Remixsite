@@ -3,6 +3,7 @@ import { get, route } from 'remix/routes'
 export const routes = route({
   assets: get('/assets/*path'),
   home: '/',
+  games: get('/games'),
   health: get('/health'),
   contact: { method: 'POST', pattern: '/contact' },
   robloxLogin: get('/auth/roblox/login'),
