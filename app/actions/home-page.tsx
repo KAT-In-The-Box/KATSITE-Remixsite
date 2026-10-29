@@ -693,6 +693,37 @@ function About() {
         mix={css({
           display: 'grid',
           gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          gap: '16px',
+          marginBottom: '32px',
+          '@media (max-width: 760px)': { gridTemplateColumns: 'minmax(0, 1fr)' },
+        })}
+      >
+        {[
+          { icon: '↔', title: 'Acquisition', body: 'We offer flexible full or partial acquisition deals to high-potential Roblox games to accelerate their success.' },
+          { icon: '⌁', title: 'Marketing', body: 'Our team drives player growth through targeted campaigns, community engagement, and data-driven platform strategies.' },
+          { icon: '</>', title: 'Game Development', body: 'We build and maintain high-quality Roblox experiences from concept to launch, delivering polished games that players love.' },
+        ].map((item) => (
+          <article key={item.title} mix={css({
+            display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+            padding: '28px 22px 30px', minHeight: '228px',
+            border: '1px solid rgba(195,218,245,.15)', borderRadius: '16px',
+            background: 'linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.012) 55%), rgba(14,20,29,.62)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,.06)',
+          })}>
+            <div aria-hidden="true" mix={css({
+              display: 'grid', placeItems: 'center', width: '58px', height: '58px', marginBottom: '22px',
+              borderRadius: '50%', color: 'var(--accent)', background: 'rgba(169,200,232,.10)',
+              border: '1px solid rgba(169,200,232,.13)', fontSize: '25px', fontWeight: 600,
+            })}>{item.icon}</div>
+            <h3 mix={css({ margin: '0 0 10px', fontSize: '20px', lineHeight: 1.3 })}>{item.title}</h3>
+            <p mix={css({ margin: 0, color: 'var(--muted)', fontSize: '14px', lineHeight: 1.65 })}>{item.body}</p>
+          </article>
+        ))}
+      </div>
+      <div
+        mix={css({
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
           gap: '32px',
           '@media (max-width: 760px)': { gridTemplateColumns: 'minmax(0, 1fr)', gap: '28px' },
           '& h3': { margin: '0 0 8px', fontSize: '20px' },
