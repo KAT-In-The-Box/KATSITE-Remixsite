@@ -57,8 +57,8 @@ function firstId(value: unknown): number | null {
 export function getRobloxPlaceId(value: string): number | null {
   try {
     const url = new URL(value)
-    if (url.protocol !== 'https:' || !/(^|\\.)roblox\\.com$/i.test(url.hostname)) return null
-    const match = url.pathname.match(/^\\/games\\/(\\d+)/i)
+    if (url.protocol !== 'https:' || !/(^|\.)roblox\.com$/i.test(url.hostname)) return null
+    const match = url.pathname.match(/^\/games\/(\d+)/i)
     return match ? firstId(Number(match[1])) : null
   } catch {
     return null
