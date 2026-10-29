@@ -308,7 +308,7 @@ function Hero() {
         </div>
       </div>
       <img
-        src="/hero-background-dim.gif"
+        src="/7E1E8A66-F75A-422B-A520-3B03A824C8D2.gif"
         alt=""
         aria-hidden="true"
         mix={css({
@@ -319,8 +319,8 @@ function Hero() {
           height: '100%',
           objectFit: 'cover',
           objectPosition: 'center',
-          opacity: '.78',
-          filter: 'brightness(.82) saturate(.82)',
+          opacity: '.72',
+          filter: 'brightness(.62) saturate(.78)',
           pointerEvents: 'none',
         })}
       />
@@ -328,9 +328,9 @@ function Hero() {
         position: 'absolute',
         zIndex: -1,
         inset: 0,
-        background: 'linear-gradient(90deg, rgba(2,5,10,.52) 0%, rgba(2,5,10,.40) 46%, rgba(2,5,10,.34) 100%)',
+        background: 'linear-gradient(90deg, rgba(2,5,10,.60) 0%, rgba(2,5,10,.48) 46%, rgba(2,5,10,.52) 100%)',
         pointerEvents: 'none',
-        '@media (max-width: 760px)': { background: 'rgba(2,5,10,.48)' },
+        '@media (max-width: 760px)': { background: 'rgba(2,5,10,.58)' },
       })} />
     </section>
   )
