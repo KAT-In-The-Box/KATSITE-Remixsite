@@ -913,7 +913,7 @@ function SiteFooter() {
                 <a href="/#games">Our games ↗</a>
                 <a href="/careers">Careers ↗</a>
                 <a href="/#about">About us ↗</a>
-                <a href="/staff">Staff login ↗</a>
+                <a href="/staff/games">Staff login ↗</a>
               </nav>
             </div>
             <a href="/#contact" mix={css({
