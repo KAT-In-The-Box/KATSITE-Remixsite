@@ -58,7 +58,7 @@ a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible{outlin
 <nav class="nav" aria-label="Staff navigation"><a class="active" href="/staff">Overview</a><a class="hide-sm" href="#tools">Tools</a><a class="nav-cta" href="/">Main site ↗</a></nav>
 </header></div>
 <main class="wrap main">
-<div class="topline"><div><p class="eyebrow">KaTBox internal · Staff workspace</p><h1 class="heading">Welcome back, ${safeName}.</h1><p class="intro">Your home base for studio operations, game management, and the tools that keep our worlds running.</p></div><div class="welcome-side"><div class="avatar" aria-hidden="true">\${safeName.charAt(0).toUpperCase()}</div><div><small>Signed in as</small><strong>${safeName}</strong></div></div></div>
+<div class="topline"><div><p class="eyebrow">KaTBox internal · Staff workspace</p><h1 class="heading">Welcome back, ${safeName}.</h1><p class="intro">Your home base for studio operations, game management, and the tools that keep our worlds running.</p></div><div class="welcome-side"><div class="avatar" aria-hidden="true">${safeName.charAt(0).toUpperCase()}</div><div><small>Signed in as</small><strong>${safeName}</strong></div></div></div>
 <section class="statusbar" aria-label="Account status"><span class="status-dot" aria-hidden="true"></span><div><strong>Roblox account verified</strong><p>Your account is approved for the KaTBox staff portal.</p></div><span class="status-label">Access active</span></section>
 <div class="section-head" id="tools"><div><h2>Your workspace</h2><p>Quick access to staff areas and studio systems.</p></div><span class="section-kicker">01 / Overview</span></div>
 <div class="cards">
