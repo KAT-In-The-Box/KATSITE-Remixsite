@@ -278,7 +278,7 @@ function Hero() {
           Games worth climbing into.
         </h1>
         <p mix={css({ margin: '28px 0 0', maxWidth: '50ch', fontSize: '20px', color: 'var(--muted)' })}>
-          KaTBox Interactive makes Roblox experiences, from the first prototype through live
+          KaTBox Interactive makes games under the Roblox Metaverse, from the first prototype through live
           updates.
         </p>
         <div mix={css({ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '40px' })}>
