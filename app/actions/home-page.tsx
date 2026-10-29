@@ -307,39 +307,30 @@ function Hero() {
           </a>
         </div>
       </div>
-      <video
+      <img
+        src="/hero-background-dim.gif"
+        alt=""
         aria-hidden="true"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        poster="/katbox-mascot.png"
         mix={css({
           position: 'absolute',
-          zIndex: -1,
-          right: '-2%',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: 'min(68vw, 1000px)',
+          zIndex: -2,
+          inset: 0,
+          width: '100%',
           height: '100%',
-          objectFit: 'contain',
-          objectPosition: 'right center',
-          opacity: '.88',
+          objectFit: 'cover',
+          objectPosition: 'center',
+          opacity: '.78',
+          filter: 'brightness(.82) saturate(.82)',
           pointerEvents: 'none',
-          mixBlendMode: 'screen',
-          '@media (max-width: 760px)': { right: '-18%', width: '100%', opacity: '.42', objectPosition: 'center' },
         })}
-      >
-        <source src="/hero-transparent.webm" type="video/webm" />
-      </video>
+      />
       <div aria-hidden="true" mix={css({
         position: 'absolute',
         zIndex: -1,
         inset: 0,
-        background: 'linear-gradient(90deg, rgba(0,0,0,.40) 0%, rgba(0,0,0,.30) 46%, rgba(0,0,0,.08) 100%)',
+        background: 'linear-gradient(90deg, rgba(2,5,10,.52) 0%, rgba(2,5,10,.40) 46%, rgba(2,5,10,.34) 100%)',
         pointerEvents: 'none',
-        '@media (max-width: 760px)': { background: 'rgba(0,0,0,.38)' },
+        '@media (max-width: 760px)': { background: 'rgba(2,5,10,.48)' },
       })} />
     </section>
   )
