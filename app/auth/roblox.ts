@@ -177,7 +177,7 @@ export async function finishRobloxLogin(request: Request): Promise<Response> {
     }
 
     const name = (profile.preferred_username ?? profile.nickname ?? profile.name ?? `Roblox user ${id}`).slice(0, 80)
-    const headers = new Headers({ Location: '/staff' })
+    const headers = new Headers({ Location: '/staff/games' })
     headers.append('Set-Cookie', cookieHeader(SESSION_COOKIE, seal({ id, name, kind: 'staff' }, SESSION_TTL_SECONDS), SESSION_TTL_SECONDS))
     headers.append('Set-Cookie', clearCookie)
     return new Response(null, { status: 303, headers })
