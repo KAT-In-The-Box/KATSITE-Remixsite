@@ -31,7 +31,7 @@ function escapeHtml(value: string): string {
 
 function staffPage(name: string): Response {
   const safeName = escapeHtml(name)
-  return new Response(\`<!doctype html>
+  return new Response(`<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#000000">
 <title>Staff Portal | KaTBox Interactives</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,7 +58,7 @@ a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible{outlin
 <nav class="nav" aria-label="Staff navigation"><a class="active" href="/staff">Overview</a><a class="hide-sm" href="#tools">Tools</a><a class="nav-cta" href="/">Main site ↗</a></nav>
 </header></div>
 <main class="wrap main">
-<div class="topline"><div><p class="eyebrow">KaTBox internal · Staff workspace</p><h1 class="heading">Welcome back, \${safeName}.</h1><p class="intro">Your home base for studio operations, game management, and the tools that keep our worlds running.</p></div><div class="welcome-side"><div class="avatar" aria-hidden="true">\${safeName.charAt(0).toUpperCase()}</div><div><small>Signed in as</small><strong>\${safeName}</strong></div></div></div>
+<div class="topline"><div><p class="eyebrow">KaTBox internal · Staff workspace</p><h1 class="heading">Welcome back, ${safeName}.</h1><p class="intro">Your home base for studio operations, game management, and the tools that keep our worlds running.</p></div><div class="welcome-side"><div class="avatar" aria-hidden="true">\${safeName.charAt(0).toUpperCase()}</div><div><small>Signed in as</small><strong>${safeName}</strong></div></div></div>
 <section class="statusbar" aria-label="Account status"><span class="status-dot" aria-hidden="true"></span><div><strong>Roblox account verified</strong><p>Your account is approved for the KaTBox staff portal.</p></div><span class="status-label">Access active</span></section>
 <div class="section-head" id="tools"><div><h2>Your workspace</h2><p>Quick access to staff areas and studio systems.</p></div><span class="section-kicker">01 / Overview</span></div>
 <div class="cards">
@@ -78,7 +78,7 @@ a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible{outlin
 </section>
 </div>
 <footer class="footer"><span class="footer-brand">KaTBox Interactives</span><span>Internal staff workspace · Keep it in the box.</span></footer>
-</main></body></html>\`, {
+</main></body></html>`, {
     headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'" },
   })
 }
