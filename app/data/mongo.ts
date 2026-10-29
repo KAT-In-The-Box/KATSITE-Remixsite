@@ -72,7 +72,17 @@ export interface ManagedGame extends RobloxGameMetadata {
 
 export async function listManagedGames(): Promise<ManagedGame[]> {
   if (!db) return []
-  return db.collection<ManagedGame>(config.mongodbGamesCollection).find({}).sort({ sortOrder: 1, updatedAt: -1, name: 1 }).toArray()
+  const collection = db.collection<ManagedGame>(config.mongodbGamesCollection)
+  // Give existing records a stable order the first time the ordering UI is used.
+  const unranked = await collection.find({ sortOrder: { $exists: false } }).sort({ updatedAt: -1, name: 1 }).toArray()
+  if (unranked.length) {
+    const last = await collection.find({ sortOrder: { $exists: true } }).sort({ sortOrder: -1 }).limit(1).next()
+    let nextOrder = (last?.sortOrder ?? -1) + 1
+    for (const game of unranked) {
+      await collection.updateOne({ _id: game._id }, { $set: { sortOrder: nextOrder++ } })
+    }
+  }
+  return collection.find({}).sort({ sortOrder: 1, name: 1 }).toArray()
 }
 
 export async function createManagedGame(input: Pick<ManagedGame, 'placeUrl' | 'status'> & RobloxGameMetadata): Promise<void> {
