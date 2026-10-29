@@ -372,7 +372,7 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: Manag
   return () => {
     const url = handle.props.bladesOfChanceUrl
     const managedGames = (handle.props.managedGames ?? []).filter((game) => game.status !== 'Archived' && game.status !== 'Paused')
-    const featured = managedGames[0]
+    const featured = managedGames.find((game) => game.featured) ?? managedGames[0]
     const moreGames = managedGames.slice(1)
     const gameStats = (game: ManagedGame) => [
       { label: 'Playing', value: formatGameNumber(game.playing ?? 0) },
