@@ -152,20 +152,46 @@ export function HomePage(handle: Handle<HomePageProps>) {
                 </div>
                 <span aria-hidden="true" mix={css({ width: '7px', height: '7px', borderRadius: '50%', background: '#a9c8e8', boxShadow: '0 0 12px rgba(169,200,232,.65)', flexShrink: 0 })} />
               </div>
-              <div mix={css({ overflow: 'hidden', borderRadius: '14px', border: '1px solid rgba(190,211,235,.12)', background: '#11151d' })}>
-                <iframe
-                  src="https://discord.com/widget?id=710298564877615255&theme=dark"
-                  width="100%"
-                  height="390"
-                  allowTransparency={true}
-                  frameBorder={0}
-                  sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                  title="KaTBox Discord server"
-                  loading="lazy"
-                  mix={css({ display: 'block', width: '100%', height: '390px', border: 0, background: '#11151d' })}
-                />
+              <div
+                id="katbox-discord-widget"
+                data-guild-id="710298564877615255"
+                mix={css({
+                  overflow: 'hidden',
+                  borderRadius: '15px',
+                  border: '1px solid rgba(190,211,235,.12)',
+                  background: 'linear-gradient(155deg, #151d2a, #0b1018)',
+                  padding: '15px',
+                  color: '#f5f8fc',
+                })}
+              >
+                <div mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '15px' })}>
+                  <div>
+                    <p mix={css({ margin: 0, fontSize: '10px', fontWeight: 700, letterSpacing: '.13em', color: '#9eafc4', textTransform: 'uppercase' })}>Community activity</p>
+                    <p mix={css({ margin: '3px 0 0', fontSize: '23px', lineHeight: 1.2, fontWeight: 700, letterSpacing: '-.04em' })}><span id="katbox-discord-online">—</span> <span mix={css({ fontSize: '13px', color: '#aab5c3', fontWeight: 500, letterSpacing: 0 })}>online now</span></p>
+                  </div>
+                  <span mix={css({ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 9px', borderRadius: '999px', border: '1px solid rgba(169,200,232,.18)', background: 'rgba(169,200,232,.07)', color: '#c8def4', fontSize: '10px', fontWeight: 700, whiteSpace: 'nowrap' })}><span aria-hidden="true" mix={css({ width: '6px', height: '6px', borderRadius: '50%', background: '#8ed6ae', boxShadow: '0 0 9px rgba(142,214,174,.65)' })} /> LIVE STATUS</span>
+                </div>
+                <div mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '9px' })}>
+                  <p mix={css({ margin: 0, fontSize: '11px', color: '#cbd5e2', fontWeight: 700 })}>Around the community</p>
+                  <span id="katbox-discord-member-count" mix={css({ fontSize: '10px', color: '#8292a7' })}>Loading members…</span>
+                </div>
+                <div id="katbox-discord-members" aria-live="polite" mix={css({ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '9px', minHeight: '104px', '@media (max-width: 380px)': { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' } })}>
+                  {Array.from({ length: 8 }, (_, index) => (
+                    <div key={index} mix={css({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', padding: '9px 3px', borderRadius: '12px', background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.045)' })}>
+                      <span mix={css({ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #26364a, #131c29)' })} />
+                      <span mix={css({ width: '42px', height: '5px', borderRadius: '999px', background: 'rgba(190,211,235,.12)' })} />
+                    </div>
+                  ))}
+                </div>
+                <div mix={css({ marginTop: '15px', paddingTop: '13px', borderTop: '1px solid rgba(190,211,235,.10)' })}>
+                  <p mix={css({ margin: '0 0 9px', fontSize: '11px', color: '#cbd5e2', fontWeight: 700 })}>Public voice channels</p>
+                  <div id="katbox-discord-channels" mix={css({ display: 'flex', flexDirection: 'column', gap: '6px', color: '#94a4b9', fontSize: '11px' })}>
+                    <span>Checking community channels…</span>
+                  </div>
+                </div>
+                <p id="katbox-discord-status" role="status" mix={css({ margin: '12px 0 0', color: '#7f91a8', fontSize: '10px', lineHeight: 1.5 })}>Connecting to Discord community data…</p>
               </div>
-              <a href="https://discord.com/channels/710298564877615255" target="_blank" rel="noreferrer" mix={css({
+              <a id="katbox-discord-invite" href="https://discord.com" target="_blank" rel="noreferrer" mix={css({
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 minHeight: '43px', marginTop: '10px', borderRadius: '12px',
                 border: '1px solid rgba(169,200,232,.22)', background: 'rgba(169,200,232,.09)',
