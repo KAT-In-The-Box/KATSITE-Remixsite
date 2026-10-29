@@ -4,7 +4,8 @@ import { createRedirectResponse } from 'remix/response/redirect'
 import { assets } from '../assets.ts'
 import { config } from '../config.ts'
 import { beginRobloxLogin, endStaffSession, finishRobloxLogin, getStaffSession } from '../auth/roblox.ts'
-import { createManagedGame, deleteManagedGame, hasDb, listManagedGames, pingDb, saveContactMessage, updateManagedGameStatus, type GameStatus } from '../data/mongo.ts'
+import { createManagedGame, deleteManagedGame, hasDb, listManagedGames, pingDb, saveContactMessage, updateManagedGameMetadata, updateManagedGameStatus, type GameStatus } from '../data/mongo.ts'
+import { fetchRobloxGame } from '../data/roblox-games.ts'
 import { routes } from '../routes.ts'
 import { HomePage, type ContactValues } from './home-page.tsx'
 
@@ -128,6 +129,19 @@ export default createController(routes, {
       let games = []
       try {
         games = await listManagedGames()
+        // Refresh cached public Roblox stats periodically without blocking every page view.
+        for (const game of games) {
+          const synced = game.lastSyncedAt ? new Date(game.lastSyncedAt).getTime() : 0
+          if (Date.now() - synced > 30 * 60 * 1000 && game._id) {
+            try {
+              const metadata = await fetchRobloxGame(game.placeUrl)
+              await updateManagedGameMetadata(String(game._id), metadata)
+              Object.assign(game, metadata)
+            } catch (error) {
+              console.error('Could not refresh Roblox metadata for', game.name, error)
+            }
+          }
+        }
       } catch (error) {
         console.error('Failed to load public game list:', error)
       }
@@ -167,23 +181,30 @@ export default createController(routes, {
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
       const form = context.formData
-      const name = readText(form, 'name')
+      const nameOverride = readText(form, 'name')
       const placeUrl = readText(form, 'placeUrl')
-      const description = readText(form, 'description')
+      const descriptionOverride = readText(form, 'description')
       const status = readText(form, 'status') as GameStatus
       const allowedStatuses: GameStatus[] = ['In development', 'Live', 'Paused', 'Archived']
       let message = ''
-      if (!name || name.length > 80) message = 'Enter a game name between 1 and 80 characters.'
-      else if (description.length > 500) message = 'Description must be 500 characters or fewer.'
+      if (nameOverride.length > 80) message = 'Game name must be 80 characters or fewer.'
+      else if (descriptionOverride.length > 500) message = 'Description must be 500 characters or fewer.'
       else if (!/^https:\/\/(www\.)?roblox\.com\/games\/\d+/i.test(placeUrl)) message = 'Enter a valid Roblox game URL, such as https://www.roblox.com/games/123456789.'
       else if (!allowedStatuses.includes(status)) message = 'Choose a valid game status.'
       if (!message) {
         try {
-          await createManagedGame({ name, placeUrl, description, status })
-          message = 'Game added to your workspace.'
+          const metadata = await fetchRobloxGame(placeUrl)
+          await createManagedGame({
+            ...metadata,
+            placeUrl,
+            status,
+            name: nameOverride || metadata.name,
+            description: descriptionOverride || metadata.description,
+          })
+          message = 'Roblox details imported and game added to your workspace.'
         } catch (error) {
-          console.error('Failed to create managed game:', error)
-          message = 'Could not save the game. Make sure MongoDB is configured and connected.'
+          console.error('Failed to import or create managed game:', error)
+          message = error instanceof Error ? error.message : 'Could not import the Roblox game. Check the URL and try again.'
         }
       }
       let games = []
