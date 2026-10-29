@@ -794,6 +794,76 @@ export function GamesPage(handle: Handle<{ managedGames?: ManagedGame[] }>) {
             </section>
           </main>
           <SiteFooter />
+          <details
+            mix={css({
+              position: 'fixed',
+              right: '22px',
+              bottom: '22px',
+              zIndex: 100,
+              fontFamily: BODY_FONT,
+              '@media (max-width: 560px)': { right: '12px', bottom: '12px' },
+            })}
+          >
+            <summary
+              aria-label="Open KaTBox Discord server widget"
+              title="Join our Discord"
+              mix={css({
+                listStyle: 'none',
+                cursor: 'pointer',
+                width: '58px',
+                height: '58px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#f8fbff',
+                background: 'linear-gradient(145deg, rgba(169,200,232,.22), rgba(10,15,24,.96))',
+                border: '1px solid rgba(169,200,232,.55)',
+                boxShadow: '0 12px 34px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.18)',
+                backdropFilter: 'blur(18px)',
+                WebkitBackdropFilter: 'blur(18px)',
+                transition: 'transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease',
+                '&:hover': { transform: 'translateY(-3px)', borderColor: 'rgba(220,237,255,.9)', boxShadow: '0 14px 38px rgba(0,0,0,.48), 0 0 20px rgba(114,169,230,.16)' },
+                '&::-webkit-details-marker': { display: 'none' },
+              })}
+            >
+              <span mix={css({ fontSize: '25px', fontWeight: 700, lineHeight: 1 })}>☏</span>
+            </summary>
+            <div
+              mix={css({
+                position: 'absolute',
+                right: 0,
+                bottom: '72px',
+                width: 'min(350px, calc(100vw - 24px))',
+                padding: '10px',
+                borderRadius: '18px',
+                border: '1px solid rgba(169,200,232,.32)',
+                background: 'rgba(8,12,19,.94)',
+                boxShadow: '0 22px 70px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.10)',
+                backdropFilter: 'blur(24px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(140%)',
+              })}
+            >
+              <div mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '5px 5px 10px' })}>
+                <div>
+                  <p mix={css({ margin: 0, fontSize: '13px', fontWeight: 700, color: '#f8fbff' })}>KaTBox Community</p>
+                  <p mix={css({ margin: '3px 0 0', fontSize: '11px', color: '#aab5c3' })}>Chat with us on Discord</p>
+                </div>
+                <a href="https://discord.com/channels/710298564877615255" target="_blank" rel="noreferrer" mix={css({ color: '#a9c8e8', fontSize: '11px', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' })}>Open Discord ↗</a>
+              </div>
+              <iframe
+                src="https://discord.com/widget?id=710298564877615255&theme=dark"
+                width="100%"
+                height="430"
+                allowTransparency={true}
+                frameBorder={0}
+                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+                title="KaTBox Discord server"
+                loading="lazy"
+                mix={css({ display: 'block', width: '100%', height: '430px', border: 0, borderRadius: '12px', background: '#11151d' })}
+              />
+            </div>
+          </details>
         </div>
       </Document>
     )
