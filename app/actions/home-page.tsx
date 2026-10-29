@@ -582,13 +582,13 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: Manag
               {selected.map((game) => (
                 <article key={String(game._id ?? game.name)} mix={[card, css({ overflow: 'hidden', padding: 0, gap: 0 })]}>
                   <a href={game.placeUrl} target="_blank" rel="noopener noreferrer" aria-label={'Open ' + game.name + ' on Roblox'} mix={css({ display: 'block', position: 'relative', height: 'clamp(130px, 17vw, 190px)', overflow: 'hidden', background: 'radial-gradient(ellipse at 70% 20%, rgba(169,200,232,.18), transparent 55%), linear-gradient(135deg,#172436,#080c12)', textDecoration: 'none' })}>
-                    {game.bannerUrl ? <img src={game.bannerUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = 'none' }} mix={css({ width: '100%', height: '100%', objectFit: 'cover', display: 'block' })} /> : null}
+                    {game.bannerUrl ? <img src={game.bannerUrl} alt="" loading="lazy" mix={css({ width: '100%', height: '100%', objectFit: 'cover', display: 'block' })} /> : null}
                     <span mix={css({ position: 'absolute', left: '12px', bottom: '12px', padding: '5px 9px', borderRadius: '999px', background: 'rgba(0,0,0,.78)', border: '1px solid rgba(255,255,255,.14)', fontSize: '9px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' })}>Featured</span>
                   </a>
                   <div mix={css({ padding: '16px' })}>
                     <div mix={css({ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' })}>
                       <div mix={css({ width: '42px', height: '42px', flexShrink: 0, display: 'grid', placeItems: 'center', overflow: 'hidden', borderRadius: '11px', background: '#182536', border: '1px solid var(--line)', color: 'var(--accent)', fontFamily: DISPLAY_FONT, fontSize: '23px' })}>
-                        {game.iconUrl ? <img src={game.iconUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = 'none' }} mix={css({ width: '100%', height: '100%', objectFit: 'cover' })} /> : game.name.slice(0,1)}
+                        {game.iconUrl ? <img src={game.iconUrl} alt="" loading="lazy" mix={css({ width: '100%', height: '100%', objectFit: 'cover' })} /> : game.name.slice(0,1)}
                       </div>
                       <h3 mix={css({ margin: 0, fontSize: '18px', lineHeight: 1.15, overflowWrap: 'anywhere' })}>{game.name}</h3>
                     </div>
@@ -608,7 +608,7 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: Manag
                 <div mix={css({ display: 'grid', gap: '8px' })}>
                   {moreGames.map((game) => (
                     <a key={String(game._id ?? game.name)} href={game.placeUrl} target="_blank" rel="noopener noreferrer" mix={css({ display: 'grid', gridTemplateColumns: '46px minmax(0,1fr) auto', gap: '13px', alignItems: 'center', padding: '12px 14px', border: '1px solid var(--line)', borderRadius: '13px', background: 'rgba(255,255,255,.025)', textDecoration: 'none', '&:hover': { borderColor: 'rgba(169,200,232,.4)', background: 'rgba(169,200,232,.04)' } })}>
-                      <div mix={css({ width: '46px', height: '46px', display: 'grid', placeItems: 'center', overflow: 'hidden', borderRadius: '10px', background: '#182536', color: 'var(--accent)', fontFamily: DISPLAY_FONT, fontSize: '22px' })}>{game.iconUrl ? <img src={game.iconUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = 'none' }} mix={css({ width: '100%', height: '100%', objectFit: 'cover' })} /> : game.name.slice(0,1)}</div>
+                      <div mix={css({ width: '46px', height: '46px', display: 'grid', placeItems: 'center', overflow: 'hidden', borderRadius: '10px', background: '#182536', color: 'var(--accent)', fontFamily: DISPLAY_FONT, fontSize: '22px' })}>{game.iconUrl ? <img src={game.iconUrl} alt="" loading="lazy" mix={css({ width: '100%', height: '100%', objectFit: 'cover' })} /> : game.name.slice(0,1)}</div>
                       <div mix={css({ minWidth: 0 })}><h4 mix={css({ margin: 0, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })}>{game.name}</h4><p mix={css({ margin: '3px 0 0', color: 'var(--muted)', fontSize: '10px' })}>{formatGameNumber(game.visits ?? 0)} visits · {formatGameNumber(game.playing ?? 0)} playing</p></div>
                       <span mix={css({ color: 'var(--accent)', fontSize: '11px' })}>↗</span>
                     </a>
