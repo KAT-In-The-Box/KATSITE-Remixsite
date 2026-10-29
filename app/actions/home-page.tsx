@@ -102,7 +102,13 @@ export function HomePage(handle: Handle<HomePageProps>) {
                 '&::-webkit-details-marker': { display: 'none' },
               })}
             >
-              <span mix={css({ fontSize: '25px', fontWeight: 700, lineHeight: 1 })}>☏</span>
+              <img
+                src="/1530599699256705095.webp"
+                alt="Discord"
+                width={34}
+                height={34}
+                mix={css({ display: 'block', width: '34px', height: '34px', objectFit: 'contain', borderRadius: '50%' })}
+              />
             </summary>
             <div
               mix={css({
