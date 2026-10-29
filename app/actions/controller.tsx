@@ -123,9 +123,15 @@ export default createController(routes, {
       return (await assets.fetch(context.request)) ?? new Response('Not Found', { status: 404 })
     },
 
-    home(context) {
+    async home(context) {
       let sent = new URL(context.request.url).searchParams.get('sent') === '1'
-      return context.render(<HomePage bladesOfChanceUrl={config.bladesOfChanceUrl} sent={sent} />)
+      let games = []
+      try {
+        games = await listManagedGames()
+      } catch (error) {
+        console.error('Failed to load public game list:', error)
+      }
+      return context.render(<HomePage bladesOfChanceUrl={config.bladesOfChanceUrl} managedGames={games} sent={sent} />)
     },
 
     async health() {
