@@ -273,8 +273,27 @@ export default createController(routes, {
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
       const id = readText(context.formData, 'id')
       let message = ''
-      try { await setFeaturedManagedGame(id); message = 'Featured game updated. The homepage will now highlight this experience.' }
+      const rawSlot = readText(context.formData, 'slot')
+      const slot = rawSlot === '' || rawSlot === '0' ? null : Number(rawSlot)
+      try { await setFeaturedManagedGame(id, slot); message = slot === null ? 'Game removed from featured slots.' : `Featured slot 0${slot} updated.` }
       catch (error) { console.error('Failed to set featured game:', error); message = error instanceof Error ? error.message : 'Could not set featured game.' }
+      let games = []
+      try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
+      return gameManagerPage(user.name, games, message)
+    },
+
+    async gameReorder(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const id = readText(context.formData, 'id')
+      const direction = readText(context.formData, 'direction')
+      let message = ''
+      if (direction !== 'up' && direction !== 'down') message = 'Choose a valid ordering direction.'
+      else {
+        try { await moveManagedGame(id, direction); message = 'Game order updated.' }
+        catch (error) { console.error('Failed to reorder games:', error); message = error instanceof Error ? error.message : 'Could not reorder games.' }
+      }
       let games = []
       try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
       return gameManagerPage(user.name, games, message)
