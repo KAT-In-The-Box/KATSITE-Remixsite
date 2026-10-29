@@ -200,6 +200,7 @@ export function HomePage(handle: Handle<HomePageProps>) {
               })}>Open Discord <span aria-hidden="true">↗</span></a>
             </div>
           </details>
+          <script src="/discord-widget.js" defer />
       </div>
     </Document>
   )
