@@ -400,6 +400,7 @@ function SiteHeader() {
           })}
         >
           <a href="/games" class="hide-sm">Games</a>
+          <a href="/careers" class="hide-sm">Careers</a>
           <a href="/#about" class="hide-sm">About</a>
           <a href="/#contact" class="nav-cta">Get in touch <span aria-hidden="true" mix={css({ marginLeft: '7px', fontSize: '15px', lineHeight: 1 })}>↗</span></a>
         </nav>
