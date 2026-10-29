@@ -832,101 +832,105 @@ function SiteFooter() {
     <footer
       mix={css({
         position: 'relative',
-        isolation: 'isolate',
         overflow: 'hidden',
         borderTop: '1px solid var(--line)',
-        background: 'linear-gradient(180deg, rgba(10,14,21,.94), #05070b)',
+        background: '#070a0f',
       })}
     >
-      <div
-        aria-hidden="true"
-        mix={css({
-          position: 'absolute',
-          zIndex: -1,
-          left: '50%',
-          top: '48%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          textAlign: 'center',
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none',
-          userSelect: 'none',
-          fontFamily: DISPLAY_FONT,
-          fontSize: 'clamp(100px, 22vw, 310px)',
-          lineHeight: '.8',
-          letterSpacing: '-.065em',
-          color: 'rgba(169,200,232,.055)',
-          filter: 'blur(1.5px)',
-          textShadow: '0 0 70px rgba(112,157,205,.13)',
-          '@media (max-width: 600px)': { fontSize: '28vw' },
-        })}
-      >
-        KATBOX
-      </div>
-      <div
-        mix={[
-          wrap,
-          css({
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '34px',
-            padding: '42px 24px 25px',
-          }),
-        ]}
-      >
-        <div
-          mix={css({
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '20px',
-          })}
-        >
-          <img
-            src="/katbox-logo.png"
-            alt="KaTBox Interactives"
-            width="1400"
-            height="492"
-            mix={css({ display: 'block', height: '38px', width: 'auto', opacity: .9 })}
-          />
-          <nav aria-label="Footer navigation" mix={css({
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            gap: '22px',
-            '& a': {
-              color: 'var(--muted)',
+      <div mix={[wrap, css({ position: 'relative', padding: 'clamp(42px, 7vw, 78px) 24px 22px' })]}>
+        <div mix={css({
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.5fr) minmax(220px, .7fr)',
+          gap: '38px',
+          alignItems: 'end',
+          paddingBottom: '42px',
+          '@media (max-width: 680px)': { gridTemplateColumns: '1fr', gap: '28px' },
+        })}>
+          <div>
+            <p mix={css({
+              margin: '0 0 14px',
+              color: 'var(--accent)',
               fontSize: '10px',
               fontWeight: 700,
-              letterSpacing: '.13em',
-              textDecoration: 'none',
+              letterSpacing: '.22em',
               textTransform: 'uppercase',
-              transition: 'color 160ms ease',
-            },
-            '& a:hover': { color: 'var(--accent)' },
+            })}>KaTBox Interactives · Independent game studio</p>
+            <h2 mix={css({
+              margin: 0,
+              maxWidth: '850px',
+              fontFamily: DISPLAY_FONT,
+              fontSize: 'clamp(58px, 11vw, 138px)',
+              fontWeight: 400,
+              lineHeight: '.86',
+              letterSpacing: '-.045em',
+              color: '#f4f7fb',
+              textWrap: 'balance',
+              '& span': { color: 'var(--accent)' },
+            })}>MAKE IT <span>PLAY.</span></h2>
+            <p mix={css({
+              maxWidth: '440px',
+              margin: '20px 0 0',
+              color: 'var(--muted)',
+              fontSize: '13px',
+              lineHeight: 1.8,
+            })}>We build memorable worlds and experiences for players. Have an idea or want to work together? We’d love to hear from you.</p>
+          </div>
+          <div mix={css({
+            display: 'grid',
+            gap: '22px',
+            padding: '22px',
+            border: '1px solid var(--line)',
+            borderRadius: '16px',
+            background: 'linear-gradient(145deg, rgba(169,200,232,.08), rgba(255,255,255,.015))',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
           })}>
-            <a href="/careers">Careers</a>
-            <a href="/staff">Staff login</a>
-            <a href="/#games">Games</a>
-            <a href="/#contact">Contact</a>
-          </nav>
+            <div>
+              <p mix={css({ margin: '0 0 12px', color: 'var(--muted)', fontSize: '9px', fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase' })}>Explore KaTBox</p>
+              <nav aria-label="Footer navigation" mix={css({
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px 18px',
+                '& a': { color: '#e5edf7', fontSize: '12px', fontWeight: 600, textDecoration: 'none', transition: 'color 160ms ease' },
+                '& a:hover': { color: 'var(--accent)' },
+              })}>
+                <a href="/#games">Our games ↗</a>
+                <a href="/careers">Careers ↗</a>
+                <a href="/#about">About us ↗</a>
+                <a href="/staff">Staff login ↗</a>
+              </nav>
+            </div>
+            <a href="/#contact" mix={css({
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              padding: '13px 15px',
+              borderRadius: '10px',
+              background: 'var(--accent)',
+              color: '#07101a',
+              fontSize: '12px',
+              fontWeight: 700,
+              textDecoration: 'none',
+              transition: 'transform 160ms ease, filter 160ms ease',
+              '&:hover': { transform: 'translateY(-2px)', filter: 'brightness(1.06)' },
+            })}>
+              Start a conversation <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
-        <div
-          mix={css({
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '10px 20px',
-            paddingTop: '17px',
-            borderTop: '1px solid var(--line)',
-            color: 'var(--muted)',
-            fontSize: '11px',
-          })}
-        >
-          <span>&copy; {new Date().getFullYear()} KaTBox Interactives.</span>
+        <div mix={css({
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '10px 20px',
+          paddingTop: '18px',
+          borderTop: '1px solid var(--line)',
+          color: 'var(--muted)',
+          fontSize: '10px',
+        })}>
+          <span>© {new Date().getFullYear()} KaTBox Interactives. All rights reserved.</span>
           <span>Built with creativity. Made for players.</span>
         </div>
       </div>
