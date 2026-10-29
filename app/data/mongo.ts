@@ -70,25 +70,25 @@ export interface ManagedGame {
 
 export async function listManagedGames(): Promise<ManagedGame[]> {
   if (!db) return []
-  return db.collection<ManagedGame>('managed_games').find({}).sort({ updatedAt: -1, name: 1 }).toArray()
+  return db.collection<ManagedGame>(config.mongodbGamesCollection).find({}).sort({ updatedAt: -1, name: 1 }).toArray()
 }
 
 export async function createManagedGame(input: Pick<ManagedGame, 'name' | 'placeUrl' | 'description' | 'status'>): Promise<void> {
   if (!db) throw new Error('MongoDB is not connected. Configure MONGODB_URI to save games.')
   const now = new Date()
-  await db.collection<ManagedGame>('managed_games').insertOne({ ...input, createdAt: now, updatedAt: now })
+  await db.collection<ManagedGame>(config.mongodbGamesCollection).insertOne({ ...input, createdAt: now, updatedAt: now })
 }
 
 export async function updateManagedGameStatus(id: string, status: GameStatus): Promise<void> {
   if (!db) throw new Error('MongoDB is not connected.')
   const { ObjectId } = await import('mongodb')
   if (!ObjectId.isValid(id)) throw new Error('Invalid game ID.')
-  await db.collection<ManagedGame>('managed_games').updateOne({ _id: new ObjectId(id) }, { $set: { status, updatedAt: new Date() } })
+  await db.collection<ManagedGame>(config.mongodbGamesCollection).updateOne({ _id: new ObjectId(id) }, { $set: { status, updatedAt: new Date() } })
 }
 
 export async function deleteManagedGame(id: string): Promise<void> {
   if (!db) throw new Error('MongoDB is not connected.')
   const { ObjectId } = await import('mongodb')
   if (!ObjectId.isValid(id)) throw new Error('Invalid game ID.')
-  await db.collection<ManagedGame>('managed_games').deleteOne({ _id: new ObjectId(id) })
+  await db.collection<ManagedGame>(config.mongodbGamesCollection).deleteOne({ _id: new ObjectId(id) })
 }
