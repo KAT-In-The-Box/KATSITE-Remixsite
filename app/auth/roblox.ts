@@ -115,13 +115,29 @@ function createHashChallenge(verifier: string): string {
 export async function finishRobloxLogin(request: Request): Promise<Response> {
   const url = new URL(request.url)
   const error = url.searchParams.get('error')
-  if (error) return new Response('Roblox sign-in was cancelled or denied.', { status: 400, headers: { 'Set-Cookie': clearOAuthCookie(), 'Cache-Control': 'no-store' } })
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
   const pending = unseal<{ state: string; verifier: string; callback: string }>(cookies(request).get(STATE_COOKIE))
   const clearCookie = clearOAuthCookie()
-  if (!code || !state || !pending || state !== pending.state) {
-    return new Response('Invalid or expired Roblox OAuth state. Please try signing in again.', { status: 400, headers: { 'Set-Cookie': clearCookie } })
+
+  // Validate state before processing either success or denial responses.
+  if (!state || !pending || state !== pending.state) {
+    return new Response('Invalid or expired Roblox OAuth state. Please try signing in again.', {
+      status: 400,
+      headers: { 'Cache-Control': 'no-store' },
+    })
+  }
+  if (error) {
+    return new Response('Roblox sign-in was cancelled or denied.', {
+      status: 400,
+      headers: { 'Set-Cookie': clearCookie, 'Cache-Control': 'no-store' },
+    })
+  }
+  if (!code) {
+    return new Response('Roblox did not return an authorization code. Please try signing in again.', {
+      status: 400,
+      headers: { 'Set-Cookie': clearCookie, 'Cache-Control': 'no-store' },
+    })
   }
 
   const clientId = process.env.ROBLOX_OAUTH_CLIENT_ID?.trim()
