@@ -829,33 +829,106 @@ function Contact(handle: Handle<Pick<HomePageProps, 'values' | 'errors' | 'sent'
 
 function SiteFooter() {
   return () => (
-    <footer mix={css({ borderTop: '1px solid var(--line)' })}>
+    <footer
+      mix={css({
+        position: 'relative',
+        isolation: 'isolate',
+        overflow: 'hidden',
+        borderTop: '1px solid var(--line)',
+        background: 'linear-gradient(180deg, rgba(10,14,21,.94), #05070b)',
+      })}
+    >
+      <div
+        aria-hidden="true"
+        mix={css({
+          position: 'absolute',
+          zIndex: -1,
+          left: '50%',
+          top: '48%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          fontFamily: DISPLAY_FONT,
+          fontSize: 'clamp(100px, 22vw, 310px)',
+          lineHeight: '.8',
+          letterSpacing: '-.065em',
+          color: 'rgba(169,200,232,.055)',
+          filter: 'blur(1.5px)',
+          textShadow: '0 0 70px rgba(112,157,205,.13)',
+          '@media (max-width: 600px)': { fontSize: '28vw' },
+        })}
+      >
+        KATBOX
+      </div>
       <div
         mix={[
           wrap,
           css({
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '34px',
+            padding: '42px 24px 25px',
+          }),
+        ]}
+      >
+        <div
+          mix={css({
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '16px',
-            padding: '32px 24px',
+            gap: '20px',
+          })}
+        >
+          <img
+            src="/katbox-logo.png"
+            alt="KaTBox Interactives"
+            width="1400"
+            height="492"
+            mix={css({ display: 'block', height: '38px', width: 'auto', opacity: .9 })}
+          />
+          <nav aria-label="Footer navigation" mix={css({
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '22px',
+            '& a': {
+              color: 'var(--muted)',
+              fontSize: '10px',
+              fontWeight: 700,
+              letterSpacing: '.13em',
+              textDecoration: 'none',
+              textTransform: 'uppercase',
+              transition: 'color 160ms ease',
+            },
+            '& a:hover': { color: 'var(--accent)' },
+          })}>
+            <a href="/careers">Careers</a>
+            <a href="/staff">Staff login</a>
+            <a href="/#games">Games</a>
+            <a href="/#contact">Contact</a>
+          </nav>
+        </div>
+        <div
+          mix={css({
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px 20px',
+            paddingTop: '17px',
+            borderTop: '1px solid var(--line)',
             color: 'var(--muted)',
-            fontSize: '15px',
-          }),
-        ]}
-      >
-        <img
-          src="/katbox-logo.png"
-          alt="KaTBox Interactives"
-          width="1400"
-          height="492"
-          mix={css({ display: 'block', height: '44px', width: 'auto' })}
-        />
-        <span>
-          &copy; {new Date().getFullYear()} KaTBox Interactives. Roblox is a trademark of Roblox
-          Corporation.
-        </span>
+            fontSize: '11px',
+          })}
+        >
+          <span>&copy; {new Date().getFullYear()} KaTBox Interactives.</span>
+          <span>Built with creativity. Made for players.</span>
+        </div>
       </div>
     </footer>
   )
