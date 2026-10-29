@@ -1,6 +1,7 @@
 import { MongoClient, type Db } from 'mongodb'
 
 import { config } from '../config.ts'
+import type { RobloxGameMetadata } from './roblox-games.ts'
 
 let client: MongoClient | null = null
 let db: Db | null = null
@@ -58,11 +59,9 @@ export async function saveContactMessage(input: Omit<ContactMessage, 'createdAt'
 
 export type GameStatus = 'In development' | 'Live' | 'Paused' | 'Archived'
 
-export interface ManagedGame {
+export interface ManagedGame extends RobloxGameMetadata {
   _id?: import('mongodb').ObjectId
-  name: string
   placeUrl: string
-  description: string
   status: GameStatus
   createdAt: Date
   updatedAt: Date
@@ -73,10 +72,17 @@ export async function listManagedGames(): Promise<ManagedGame[]> {
   return db.collection<ManagedGame>(config.mongodbGamesCollection).find({}).sort({ updatedAt: -1, name: 1 }).toArray()
 }
 
-export async function createManagedGame(input: Pick<ManagedGame, 'name' | 'placeUrl' | 'description' | 'status'>): Promise<void> {
+export async function createManagedGame(input: Pick<ManagedGame, 'placeUrl' | 'status'> & RobloxGameMetadata): Promise<void> {
   if (!db) throw new Error('MongoDB is not connected. Configure MONGODB_URI to save games.')
   const now = new Date()
   await db.collection<ManagedGame>(config.mongodbGamesCollection).insertOne({ ...input, createdAt: now, updatedAt: now })
+}
+
+export async function updateManagedGameMetadata(id: string, metadata: RobloxGameMetadata): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(id)) throw new Error('Invalid game ID.')
+  await db.collection<ManagedGame>(config.mongodbGamesCollection).updateOne({ _id: new ObjectId(id) }, { $set: { ...metadata, updatedAt: new Date() } })
 }
 
 export async function updateManagedGameStatus(id: string, status: GameStatus): Promise<void> {
