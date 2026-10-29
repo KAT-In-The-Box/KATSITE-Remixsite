@@ -227,7 +227,7 @@ function SiteHeader() {
             '@media (max-width: 560px)': { '& a.hide-sm': { display: 'none' } },
           })}
         >
-          <a href="#games" class="hide-sm">Games</a>
+          <a href="/games" class="hide-sm">Games</a>
           <a href="#about" class="hide-sm">About</a>
           <a href="#contact" class="nav-cta">Get in touch <span aria-hidden="true" mix={css({ marginLeft: '7px', fontSize: '15px', lineHeight: 1 })}>↗</span></a>
         </nav>
@@ -661,4 +661,68 @@ function SiteFooter() {
       </div>
     </footer>
   )
+}
+
+
+export function GamesPage(handle: Handle<{ managedGames?: ManagedGame[] }>) {
+  return () => {
+    const games = (handle.props.managedGames ?? []).filter((game) => game.status !== 'Archived')
+    const featured = games.find((game) => game.featured) ?? games.find((game) => game.status === 'Live') ?? games[0]
+    return (
+      <Document head={<HomeHead />} title="Games | KaTBox Interactives">
+        <div mix={css({
+          '--bg': '#000000', '--surface': '#0e0e0e', '--line': '#2a2a2a', '--ink': '#ffffff',
+          '--muted': '#b3b3b3', '--accent': '#cf9066', '--on-accent': '#000000',
+          '& *, & *::before, & *::after': { boxSizing: 'border-box' }, minHeight: '100vh',
+          background: 'var(--bg)', color: 'var(--ink)', fontFamily: BODY_FONT, fontSize: '17px',
+          lineHeight: 1.6, WebkitFontSmoothing: 'antialiased',
+          '& a': { color: 'inherit' }, '& :focus-visible': { outline: '2px solid var(--accent)', outlineOffset: '3px' },
+        })}>
+          <SiteHeader />
+          <main>
+            <section mix={[wrap, css({ paddingTop: '76px', paddingBottom: '84px' })]}>
+              <a href="/" mix={css({ display: 'inline-block', marginBottom: '18px', color: 'var(--accent)', fontSize: '12px', fontWeight: 700, letterSpacing: '.12em', textDecoration: 'none', textTransform: 'uppercase' })}>← KaTBox home</a>
+              <p mix={css({ margin: '0 0 8px', color: 'var(--accent)', fontSize: '11px', fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase' })}>The portfolio</p>
+              <h1 mix={css({ margin: '0 0 14px', fontFamily: DISPLAY_FONT, fontSize: 'clamp(42px, 7vw, 76px)', lineHeight: 1.05, fontWeight: 400 })}>Our Games</h1>
+              <p mix={css({ maxWidth: '620px', margin: '0 0 36px', color: 'var(--muted)', fontSize: '17px' })}>Experiences made and managed by KaTBox Interactives.</p>
+              {games.length ? (
+                <div mix={css({ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '20px', '@media (max-width: 650px)': { gridTemplateColumns: 'minmax(0, 1fr)' } })}>
+                  {games.map((game) => (
+                    <article key={String(game._id ?? game.name)} mix={[card, css({ overflow: 'hidden', padding: 0, gap: 0, borderColor: game === featured ? 'rgba(207,144,102,.55)' : 'var(--line)' })]}>
+                      <a href={game.placeUrl} target="_blank" rel="noreferrer" aria-label={'Play ' + game.name} mix={css({ display: 'block', position: 'relative', height: 'clamp(170px, 24vw, 260px)', overflow: 'hidden', background: 'linear-gradient(135deg, #392619, #12100f)', textDecoration: 'none' })}>
+                        {game.bannerUrl ? <img src={game.bannerUrl} alt={game.name + ' artwork'} loading="lazy" mix={css({ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 220ms ease', '&:hover': { transform: 'scale(1.025)' } })} /> : <div mix={css({ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: DISPLAY_FONT, fontSize: 'clamp(28px, 4vw, 48px)', textAlign: 'center' })}>{game.name}</div>}
+                        <span mix={css({ position: 'absolute', left: '14px', bottom: '14px', padding: '5px 9px', borderRadius: '999px', background: 'rgba(0,0,0,.82)', border: '1px solid rgba(255,255,255,.15)', fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' })}>{game === featured ? 'Featured' : game.status}</span>
+                      </a>
+                      <div mix={css({ padding: '20px' })}>
+                        <div mix={css({ display: 'flex', alignItems: 'center', gap: '13px', marginBottom: '12px' })}>
+                          {game.iconUrl ? <img src={game.iconUrl} alt="" loading="lazy" mix={css({ width: '56px', height: '56px', borderRadius: '13px', objectFit: 'cover', border: '1px solid var(--line)', flexShrink: 0 })} /> : null}
+                          <div mix={css({ minWidth: 0 })}>
+                            <p mix={css({ margin: '0 0 2px', color: 'var(--accent)', fontSize: '10px', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' })}>{game.genre || 'Roblox experience'}</p>
+                            <h2 mix={css({ margin: 0, fontSize: 'clamp(22px, 3vw, 28px)', lineHeight: 1.2, overflowWrap: 'anywhere' })}>{game.name}</h2>
+                          </div>
+                        </div>
+                        <p mix={css({ margin: '0 0 18px', minHeight: '52px', color: 'var(--muted)', fontSize: '14px', lineHeight: 1.6 })}>{game.description || 'A Roblox experience by KaTBox Interactives.'}</p>
+                        <div mix={css({ display: 'flex', flexWrap: 'wrap', gap: '18px', paddingTop: '14px', borderTop: '1px solid var(--line)', color: 'var(--muted)', fontSize: '12px' })}>
+                          <span><strong mix={css({ color: 'var(--ink)' })}>{formatGameNumber(game.visits ?? 0)}</strong> visits</span>
+                          <span><strong mix={css({ color: 'var(--ink)' })}>{formatGameNumber(game.playing ?? 0)}</strong> playing</span>
+                          <span><strong mix={css({ color: 'var(--ink)' })}>{formatGameNumber(game.favorites ?? 0)}</strong> favorites</span>
+                        </div>
+                        <a href={game.placeUrl} target="_blank" rel="noreferrer" mix={css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginTop: '18px', minHeight: '43px', padding: '0 17px', borderRadius: '999px', background: 'var(--accent)', color: '#160d08', fontSize: '12px', fontWeight: 700, textDecoration: 'none' })}>Play on Roblox ↗</a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div mix={[card, css({ padding: '36px', textAlign: 'center' })]}>
+                  <h2 mix={css({ margin: '0 0 8px', fontSize: '24px' })}>New experiences are on the way.</h2>
+                  <p mix={css({ margin: 0, color: 'var(--muted)' })}>Our game portfolio will appear here as experiences are added.</p>
+                </div>
+              )}
+            </section>
+          </main>
+          <SiteFooter />
+        </div>
+      </Document>
+    )
+  }
 }
