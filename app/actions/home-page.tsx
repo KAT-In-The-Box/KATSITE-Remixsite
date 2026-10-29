@@ -2,7 +2,6 @@ import type { Handle, RemixNode } from 'remix/component'
 import { css } from 'remix/component'
 
 import { routes } from '../routes.ts'
-import { Symbol, Wordmark } from '../ui/logo.tsx'
 import { Document } from './document.tsx'
 
 export interface ContactValues {
@@ -19,25 +18,26 @@ export interface HomePageProps {
   failed?: boolean
 }
 
-const FONT = "'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif"
+const BODY_FONT = "'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif"
+const DISPLAY_FONT = "'Pirata One', 'Space Grotesk', Georgia, serif"
 
 export function HomePage(handle: Handle<HomePageProps>) {
   return () => (
-    <Document head={<HomeHead />} title="INTRIX | Roblox game studio">
+    <Document head={<HomeHead />} title="KaTBox Interactives | Roblox game studio">
       <div
         mix={css({
-          '--bg': '#0a0c12',
-          '--surface': '#121620',
-          '--line': '#262c3b',
-          '--ink': '#f2f4f8',
-          '--muted': '#a5adbf',
-          '--accent': '#2ef2d0',
-          '--on-accent': '#0a0c12',
+          '--bg': '#000000',
+          '--surface': '#0e0e0e',
+          '--line': '#2a2a2a',
+          '--ink': '#ffffff',
+          '--muted': '#b3b3b3',
+          '--accent': '#cf9066',
+          '--on-accent': '#000000',
           '& *, & *::before, & *::after': { boxSizing: 'border-box' },
           minHeight: '100vh',
           background: 'var(--bg)',
           color: 'var(--ink)',
-          fontFamily: FONT,
+          fontFamily: BODY_FONT,
           fontSize: '17px',
           lineHeight: 1.6,
           WebkitFontSmoothing: 'antialiased',
@@ -68,14 +68,14 @@ function HomeHead() {
     <>
       <meta
         name="description"
-        content="INTRIX is a Roblox game development studio. Home of Blades of Chance."
+        content="KaTBox Interactives is a Roblox game development studio."
       />
-      <meta name="theme-color" content="#0a0c12" />
+      <meta name="theme-color" content="#000000" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Space+Grotesk:wght@400;500;700&display=swap"
       />
     </>
   )
@@ -90,12 +90,7 @@ const wrap = css({
 
 function SiteHeader() {
   return () => (
-    <header
-      mix={css({
-        borderBottom: '1px solid var(--line)',
-        background: 'var(--bg)',
-      })}
-    >
+    <header mix={css({ borderBottom: '1px solid var(--line)', background: 'var(--bg)' })}>
       <div
         mix={[
           wrap,
@@ -104,12 +99,23 @@ function SiteHeader() {
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '16px',
-            minHeight: '72px',
+            minHeight: '88px',
           }),
         ]}
       >
-        <a href="/" aria-label="INTRIX home" mix={css({ display: 'block', height: '22px' })}>
-          <Wordmark />
+        <a href="/" aria-label="KaTBox Interactives home" mix={css({ display: 'block' })}>
+          <img
+            src="/katbox-logo.png"
+            alt="KaTBox Interactives"
+            width="1400"
+            height="492"
+            mix={css({
+              display: 'block',
+              height: '64px',
+              width: 'auto',
+              '@media (max-width: 560px)': { height: '48px' },
+            })}
+          />
         </a>
         <nav
           aria-label="Primary"
@@ -147,60 +153,70 @@ function Hero() {
       mix={[
         wrap,
         css({
-          position: 'relative',
-          padding: '96px 24px 104px',
-          '@media (max-width: 560px)': { padding: '64px 24px 72px' },
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)',
+          alignItems: 'center',
+          gap: '40px',
+          padding: '80px 24px 88px',
+          '@media (max-width: 860px)': {
+            gridTemplateColumns: 'minmax(0, 1fr)',
+            padding: '48px 24px 64px',
+          },
         }),
       ]}
     >
-      <div
-        aria-hidden="true"
-        mix={css({
-          position: 'absolute',
-          right: '24px',
-          top: '56px',
-          height: '320px',
-          color: 'var(--line)',
-          '@media (max-width: 860px)': { display: 'none' },
-        })}
-      >
-        <Symbol />
+      <div>
+        <p
+          mix={css({
+            margin: '0 0 20px',
+            fontSize: '13px',
+            fontWeight: 700,
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            color: 'var(--accent)',
+          })}
+        >
+          Roblox game studio
+        </p>
+        <h1
+          mix={css({
+            margin: 0,
+            fontFamily: DISPLAY_FONT,
+            fontSize: 'clamp(48px, 8vw, 96px)',
+            lineHeight: 1,
+            fontWeight: 400,
+            letterSpacing: '0.01em',
+          })}
+        >
+          Games worth climbing into.
+        </h1>
+        <p mix={css({ margin: '28px 0 0', maxWidth: '50ch', fontSize: '20px', color: 'var(--muted)' })}>
+          KaTBox Interactives makes Roblox experiences, from the first prototype through live
+          updates.
+        </p>
+        <div mix={css({ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '40px' })}>
+          <a href="#games" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}>
+            See our games
+          </a>
+          <a href="#contact" mix={[button, css({ border: '1px solid var(--line)' })]}>
+            Get in touch
+          </a>
+        </div>
       </div>
-      <p
+      <img
+        src="/katbox-mascot.png"
+        alt="The KaTBox mascot: a cat in sunglasses sitting in a cardboard box"
+        width="900"
+        height="981"
         mix={css({
-          margin: '0 0 20px',
-          fontSize: '13px',
-          fontWeight: 700,
-          letterSpacing: '0.16em',
-          textTransform: 'uppercase',
-          color: 'var(--accent)',
+          display: 'block',
+          width: '100%',
+          maxWidth: '420px',
+          height: 'auto',
+          justifySelf: 'center',
+          '@media (max-width: 860px)': { maxWidth: '260px', justifySelf: 'start' },
         })}
-      >
-        Roblox game studio
-      </p>
-      <h1
-        mix={css({
-          margin: 0,
-          maxWidth: '12ch',
-          fontSize: 'clamp(44px, 8vw, 92px)',
-          lineHeight: 1.02,
-          fontWeight: 700,
-          letterSpacing: '-0.02em',
-        })}
-      >
-        We build games worth coming back to.
-      </h1>
-      <p mix={css({ margin: '28px 0 0', maxWidth: '52ch', fontSize: '20px', color: 'var(--muted)' })}>
-        INTRIX is a team making Roblox experiences, from the first prototype through live updates.
-      </p>
-      <div mix={css({ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '40px' })}>
-        <a href="#games" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}>
-          See our games
-        </a>
-        <a href="#contact" mix={[button, css({ border: '1px solid var(--line)' })]}>
-          Get in touch
-        </a>
-      </div>
+      />
     </section>
   )
 }
@@ -240,9 +256,11 @@ function SectionHeading(handle: Handle<{ id: string; kicker: string; children: R
         id={handle.props.id}
         mix={css({
           margin: 0,
-          fontSize: 'clamp(30px, 4.4vw, 46px)',
-          lineHeight: 1.1,
-          letterSpacing: '-0.01em',
+          fontFamily: DISPLAY_FONT,
+          fontWeight: 400,
+          fontSize: 'clamp(36px, 5vw, 56px)',
+          lineHeight: 1.05,
+          letterSpacing: '0.01em',
         })}
       >
         {handle.props.children}
@@ -277,21 +295,23 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string }>) {
               mix={css({
                 height: '200px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #14323a 0%, #0f1a26 100%)',
+                background: 'linear-gradient(135deg, #3a2819 0%, #17100a 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--accent)',
-                '& span': { display: 'block', height: '96px' },
               })}
             >
-              <span>
-                <Symbol />
-              </span>
+              <img
+                src="/katbox-mascot.png"
+                alt=""
+                width="900"
+                height="981"
+                mix={css({ display: 'block', height: '150px', width: 'auto' })}
+              />
             </div>
             <h3 mix={css({ margin: '20px 0 8px', fontSize: '26px' })}>Blades of Chance</h3>
             <p mix={css({ margin: 0, color: 'var(--muted)' })}>
-              Our current Roblox experience, developed and updated by the INTRIX team.
+              A Roblox experience developed by the KaTBox team.
             </p>
             <div mix={css({ marginTop: '24px' })}>
               {url ? (
@@ -318,12 +338,21 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string }>) {
               }),
             ]}
           >
-            <p mix={css({ margin: 0, fontSize: '13px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)' })}>
+            <p
+              mix={css({
+                margin: 0,
+                fontSize: '13px',
+                fontWeight: 700,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'var(--muted)',
+              })}
+            >
               In development
             </p>
             <h3 mix={css({ margin: '12px 0 8px', fontSize: '26px' })}>Next game</h3>
             <p mix={css({ margin: 0, color: 'var(--muted)' })}>
-              More from INTRIX is on the way. Get in touch if you want to hear first.
+              More from KaTBox is on the way. Get in touch if you want to hear first.
             </p>
           </article>
         </div>
@@ -363,7 +392,7 @@ function About() {
       >
         <div>
           <h3>Built for Roblox</h3>
-          <p>Every INTRIX game is designed around how players actually use the platform.</p>
+          <p>Every KaTBox game is designed around how players actually use the platform.</p>
         </div>
         <div>
           <h3>Live from day one</h3>
@@ -475,7 +504,10 @@ function Contact(handle: Handle<Pick<HomePageProps, 'values' | 'errors' | 'sent'
               {errors.message && <p id="c-message-err" class="err">{errors.message}</p>}
             </div>
             {/* Honeypot: hidden from people, bots tend to fill it in. */}
-            <div aria-hidden="true" mix={css({ position: 'absolute', left: '-9999px', height: 0, overflow: 'hidden' })}>
+            <div
+              aria-hidden="true"
+              mix={css({ position: 'absolute', left: '-9999px', height: 0, overflow: 'hidden' })}
+            >
               <label htmlFor="c-website">Leave this empty</label>
               <input id="c-website" name="website" tabIndex={-1} autoComplete="off" />
             </div>
@@ -512,10 +544,17 @@ function SiteFooter() {
           }),
         ]}
       >
-        <span mix={css({ display: 'block', height: '16px', color: 'var(--ink)' })}>
-          <Wordmark />
+        <img
+          src="/katbox-logo.png"
+          alt="KaTBox Interactives"
+          width="1400"
+          height="492"
+          mix={css({ display: 'block', height: '44px', width: 'auto' })}
+        />
+        <span>
+          &copy; {new Date().getFullYear()} KaTBox Interactives. Roblox is a trademark of Roblox
+          Corporation.
         </span>
-        <span>&copy; {new Date().getFullYear()} INTRIX. All rights reserved. Roblox is a trademark of Roblox Corporation.</span>
       </div>
     </footer>
   )

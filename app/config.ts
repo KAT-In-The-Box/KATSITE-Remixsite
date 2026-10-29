@@ -15,10 +15,10 @@ export const config = {
   // Set TRUST_PROXY=1 on Railway so request URLs and IPs come from the proxy headers.
   trustProxy: process.env.TRUST_PROXY === '1',
   mongodbUri: optional('MONGODB_URI'),
-  mongodbDb: optional('MONGODB_DB') ?? 'intrix',
+  mongodbDb: optional('MONGODB_DB') ?? 'katbox',
   // Public link to the game on Roblox. Leave unset until the game page is final.
   bladesOfChanceUrl: optional('BLADES_OF_CHANCE_URL'),
-  // Public origin of the site, e.g. https://intrix.gg. Used to reject cross-site form posts.
+  // Public origin of the site, e.g. https://katbox.org. Used to reject cross-site form posts.
   siteOrigin: optional('SITE_ORIGIN'),
 }
 

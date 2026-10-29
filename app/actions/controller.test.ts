@@ -21,7 +21,7 @@ describe('root controller', () => {
 
     assert.equal(response.status, 200)
     assert.match(response.headers.get('Content-Type') ?? '', /text\/html/)
-    assert.match(html, /INTRIX/)
+    assert.match(html, /KaTBox Interactives/)
     assert.match(html, /Blades of Chance/)
   })
 
@@ -32,7 +32,7 @@ describe('root controller', () => {
   })
 
   it('POST /contact with valid data redirects to the thank-you state', async () => {
-    let response = await post({ name: 'Ada', email: 'ada@example.com', message: 'Hello INTRIX team' })
+    let response = await post({ name: 'Ada', email: 'ada@example.com', message: 'Hello KaTBox team' })
     assert.equal(response.status, 303)
     assert.match(response.headers.get('Location') ?? '', /sent=1/)
   })
