@@ -137,18 +137,18 @@ function SiteHeader() {
           })}
         >
           <img
-            src="/favicon.png"
+            src="/KITBEMOJILarge.png"
             alt=""
             aria-hidden="true"
-            width="48"
-            height="48"
+            width="160"
+            height="160"
             mix={css({
               display: 'block',
-              width: '38px',
-              height: '38px',
+              width: '42px',
+              height: '42px',
               objectFit: 'contain',
               flexShrink: 0,
-              '@media (max-width: 560px)': { width: '32px', height: '32px' },
+              '@media (max-width: 560px)': { width: '34px', height: '34px' },
             })}
           />
           <span mix={css({ display: 'flex', flexDirection: 'column', lineHeight: 1 })}>
@@ -156,8 +156,8 @@ function SiteHeader() {
               mix={css({
                 fontFamily: BRAND_FONT,
                 fontSize: '23px',
-                fontWeight: 800,
-                letterSpacing: '-0.045em',
+                fontWeight: 400,
+                letterSpacing: '0.01em',
                 color: '#fff',
                 whiteSpace: 'nowrap',
                 '@media (max-width: 560px)': { fontSize: '19px' },
@@ -179,8 +179,7 @@ function SiteHeader() {
               })}
             >
               Interactives
-            </span>
-          </span>
+            </span>          </span>
         </a>
         <nav
           aria-label="Primary"
