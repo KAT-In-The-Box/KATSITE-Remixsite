@@ -63,6 +63,7 @@ export interface ManagedGame extends RobloxGameMetadata {
   _id?: import('mongodb').ObjectId
   placeUrl: string
   status: GameStatus
+  featured?: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -83,6 +84,17 @@ export async function updateManagedGameMetadata(id: string, metadata: RobloxGame
   const { ObjectId } = await import('mongodb')
   if (!ObjectId.isValid(id)) throw new Error('Invalid game ID.')
   await db.collection<ManagedGame>(config.mongodbGamesCollection).updateOne({ _id: new ObjectId(id) }, { $set: { ...metadata, updatedAt: new Date() } })
+}
+
+export async function setFeaturedManagedGame(id: string): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(id)) throw new Error('Invalid game ID.')
+  const collection = db.collection<ManagedGame>(config.mongodbGamesCollection)
+  const selected = await collection.findOne({ _id: new ObjectId(id) })
+  if (!selected) throw new Error('Game was not found.')
+  await collection.updateMany({}, { $set: { featured: false } })
+  await collection.updateOne({ _id: new ObjectId(id) }, { $set: { featured: true, updatedAt: new Date() } })
 }
 
 export async function updateManagedGameStatus(id: string, status: GameStatus): Promise<void> {
