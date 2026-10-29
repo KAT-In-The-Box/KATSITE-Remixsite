@@ -77,6 +77,8 @@ export function HomePage(handle: Handle<HomePageProps>) {
               zIndex: 100,
               fontFamily: BODY_FONT,
               '@media (max-width: 560px)': { right: '12px', bottom: '12px' },
+              '&[open] summary': { borderColor: 'rgba(169,200,232,.58)', background: 'rgba(16,23,34,.96)' },
+              '&[open] summary .discord-chevron': { transform: 'rotate(180deg)' },
             })}
           >
             <summary
@@ -85,64 +87,91 @@ export function HomePage(handle: Handle<HomePageProps>) {
               mix={css({
                 listStyle: 'none',
                 cursor: 'pointer',
-                width: '58px',
-                height: '58px',
-                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: '11px',
+                minHeight: '62px',
+                padding: '8px 17px 8px 9px',
+                borderRadius: '999px',
                 color: '#f8fbff',
-                background: 'linear-gradient(145deg, rgba(169,200,232,.22), rgba(10,15,24,.96))',
-                border: '1px solid rgba(169,200,232,.55)',
-                boxShadow: '0 12px 34px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.18)',
-                backdropFilter: 'blur(18px)',
-                WebkitBackdropFilter: 'blur(18px)',
+                background: 'linear-gradient(135deg, rgba(24,33,47,.97), rgba(7,11,18,.96))',
+                border: '1px solid rgba(169,200,232,.34)',
+                boxShadow: '0 14px 38px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.10)',
+                backdropFilter: 'blur(22px) saturate(145%)',
+                WebkitBackdropFilter: 'blur(22px) saturate(145%)',
                 transition: 'transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease',
-                '&:hover': { transform: 'translateY(-3px)', borderColor: 'rgba(220,237,255,.9)', boxShadow: '0 14px 38px rgba(0,0,0,.48), 0 0 20px rgba(114,169,230,.16)' },
+                '&:hover': { transform: 'translateY(-3px)', borderColor: 'rgba(220,237,255,.72)', boxShadow: '0 18px 42px rgba(0,0,0,.48), 0 0 22px rgba(114,169,230,.12)' },
                 '&::-webkit-details-marker': { display: 'none' },
+                '@media (max-width: 560px)': { width: '58px', height: '58px', minHeight: '58px', padding: '8px', justifyContent: 'center', gap: 0 },
               })}
             >
-              <img
-                src="/1530599699256705095.webp"
-                alt="Discord"
-                width={34}
-                height={34}
-                mix={css({ display: 'block', width: '34px', height: '34px', objectFit: 'contain', borderRadius: '50%' })}
-              />
+              <span mix={css({
+                width: '43px', height: '43px', flexShrink: 0, display: 'grid', placeItems: 'center',
+                borderRadius: '50%', background: 'rgba(169,200,232,.10)', border: '1px solid rgba(169,200,232,.18)',
+                '@media (max-width: 560px)': { width: '40px', height: '40px' },
+              })}>
+                <img
+                  src="/1530599699256705095.webp"
+                  alt=""
+                  aria-hidden="true"
+                  width={34}
+                  height={34}
+                  mix={css({ display: 'block', width: '32px', height: '32px', objectFit: 'contain', borderRadius: '50%' })}
+                />
+              </span>
+              <span mix={css({ display: 'flex', flexDirection: 'column', lineHeight: 1.25, '@media (max-width: 560px)': { display: 'none' } })}>
+                <span mix={css({ fontSize: '13px', fontWeight: 700, letterSpacing: '-.01em' })}>Join the community</span>
+                <span mix={css({ marginTop: '4px', fontSize: '10px', color: '#aab5c3' })}>KaTBox on Discord</span>
+              </span>
+              <span class="discord-chevron" aria-hidden="true" mix={css({ marginLeft: '4px', color: '#a9c8e8', fontSize: '13px', transition: 'transform 180ms ease', '@media (max-width: 560px)': { display: 'none' } })}>⌃</span>
             </summary>
             <div
               mix={css({
                 position: 'absolute',
                 right: 0,
-                bottom: '72px',
-                width: 'min(350px, calc(100vw - 24px))',
+                bottom: '76px',
+                width: 'min(370px, calc(100vw - 24px))',
                 padding: '10px',
-                borderRadius: '18px',
-                border: '1px solid rgba(169,200,232,.32)',
-                background: 'rgba(8,12,19,.94)',
-                boxShadow: '0 22px 70px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.10)',
-                backdropFilter: 'blur(24px) saturate(140%)',
-                WebkitBackdropFilter: 'blur(24px) saturate(140%)',
+                borderRadius: '22px',
+                border: '1px solid rgba(169,200,232,.26)',
+                background: 'linear-gradient(145deg, rgba(20,28,41,.98), rgba(6,9,15,.985) 70%)',
+                boxShadow: '0 28px 90px rgba(0,0,0,.66), inset 0 1px 0 rgba(255,255,255,.09)',
+                backdropFilter: 'blur(28px) saturate(150%)',
+                WebkitBackdropFilter: 'blur(28px) saturate(150%)',
+                overflow: 'hidden',
+                '@media (max-width: 560px)': { bottom: '70px' },
               })}
             >
-              <div mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '5px 5px 10px' })}>
-                <div>
-                  <p mix={css({ margin: 0, fontSize: '13px', fontWeight: 700, color: '#f8fbff' })}>KaTBox Community</p>
-                  <p mix={css({ margin: '3px 0 0', fontSize: '11px', color: '#aab5c3' })}>Chat with us on Discord</p>
+              <div mix={css({ display: 'flex', alignItems: 'center', gap: '11px', padding: '9px 7px 13px' })}>
+                <span mix={css({ width: '42px', height: '42px', flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: '13px', background: 'rgba(169,200,232,.10)', border: '1px solid rgba(169,200,232,.16)' })}>
+                  <img src="/1530599699256705095.webp" alt="" aria-hidden="true" width={32} height={32} mix={css({ width: '30px', height: '30px', objectFit: 'contain', borderRadius: '50%' })} />
+                </span>
+                <div mix={css({ flex: 1, minWidth: 0 })}>
+                  <p mix={css({ margin: 0, color: '#f8fbff', fontSize: '14px', fontWeight: 700, lineHeight: 1.3 })}>KaTBox Community</p>
+                  <p mix={css({ margin: '4px 0 0', color: '#aab5c3', fontSize: '11px', lineHeight: 1.4 })}>Hang out, get updates, and meet the community.</p>
                 </div>
-                <a href="https://discord.com/channels/710298564877615255" target="_blank" rel="noreferrer" mix={css({ color: '#a9c8e8', fontSize: '11px', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' })}>Open Discord ↗</a>
+                <span aria-hidden="true" mix={css({ width: '7px', height: '7px', borderRadius: '50%', background: '#a9c8e8', boxShadow: '0 0 12px rgba(169,200,232,.65)', flexShrink: 0 })} />
               </div>
-              <iframe
-                src="https://discord.com/widget?id=710298564877615255&theme=dark"
-                width="100%"
-                height="430"
-                allowTransparency={true}
-                frameBorder={0}
-                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                title="KaTBox Discord server"
-                loading="lazy"
-                mix={css({ display: 'block', width: '100%', height: '430px', border: 0, borderRadius: '12px', background: '#11151d' })}
-              />
+              <div mix={css({ overflow: 'hidden', borderRadius: '14px', border: '1px solid rgba(190,211,235,.12)', background: '#11151d' })}>
+                <iframe
+                  src="https://discord.com/widget?id=710298564877615255&theme=dark"
+                  width="100%"
+                  height="390"
+                  allowTransparency={true}
+                  frameBorder={0}
+                  sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+                  title="KaTBox Discord server"
+                  loading="lazy"
+                  mix={css({ display: 'block', width: '100%', height: '390px', border: 0, background: '#11151d' })}
+                />
+              </div>
+              <a href="https://discord.com/channels/710298564877615255" target="_blank" rel="noreferrer" mix={css({
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                minHeight: '43px', marginTop: '10px', borderRadius: '12px',
+                border: '1px solid rgba(169,200,232,.22)', background: 'rgba(169,200,232,.09)',
+                color: '#eaf3ff', fontSize: '12px', fontWeight: 700, textDecoration: 'none',
+                transition: 'background 160ms ease', '&:hover': { background: 'rgba(169,200,232,.16)' },
+              })}>Open Discord <span aria-hidden="true">↗</span></a>
             </div>
           </details>
       </div>
