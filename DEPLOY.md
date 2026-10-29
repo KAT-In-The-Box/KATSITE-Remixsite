@@ -50,20 +50,27 @@ git push
 
 ## 6. Railway
 1. Create an account at railway.com and sign in with GitHub.
-2. New Project, Deploy from GitHub repo, pick `katbox-site`. (Check Railway's current pricing and trial limits.)
-3. Open the service, Variables tab, add:
+2. Create a project with **Deploy from GitHub repo**, then select this repository.
+3. Railway reads `railway.json` for the Node build/start commands and `/health` health check. Node 24 is pinned by `.node-version` and `package.json`.
+4. In the service's **Variables** tab, add these values (use your real secrets only in Railway, never in GitHub):
 
-   | Name | Value |
+   | Variable | Value |
    |---|---|
-   | `MONGODB_URI` | your Atlas connection string |
-   | `MONGODB_DB` | `katbox` |
+   | `NODE_ENV` | `production` |
+   | `MONGODB_URI` | Your MongoDB Atlas connection string |
+   | `MONGODB_DB` | `KatBox` |
+   | `MONGODB_GAMES_COLLECTION` | `KatBox Collection` |
    | `TRUST_PROXY` | `1` |
-   | `BLADES_OF_CHANCE_URL` | your Roblox game link (optional) |
-   | `SITE_ORIGIN` | add after step 8 |
+   | `ROBLOX_OAUTH_CLIENT_ID` | Roblox OAuth application client ID |
+   | `ROBLOX_OAUTH_CLIENT_SECRET` | Roblox OAuth application client secret |
+   | `ROBLOX_SESSION_SECRET` | Long random secret; generate with `node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"` |
+   | `ROBLOX_STAFF_USER_IDS` | Comma-separated numeric Roblox user IDs allowed to sign in |
+   | `BLADES_OF_CHANCE_URL` | Optional public Roblox game URL |
+   | `SITE_ORIGIN` | Add after generating your Railway domain, then update to your final custom domain in step 8 |
 
-4. Settings: start command `npm start` (usually detected). Healthcheck path `/health`.
-5. Deploy. The app needs no build step. If the deploy logs show a Node version below 24, check that Railway picked up `.node-version` / `engines`, or set the Node version in its settings.
-6. Settings, Networking, Generate Domain. Open it and confirm the site loads and `/health` returns ok.
+5. In your Roblox OAuth application, set the redirect/callback URL to `https://YOUR-RAILWAY-DOMAIN/auth/roblox/callback` before testing sign-in. After adding your custom domain, add its matching callback URL too if you plan to use it.
+6. Deploy. Check the deployment logs; the app should start with `npm start`. If deployment fails, check that all required variables exist and MongoDB Atlas Network Access allows Railway to connect.
+7. In Railway, open **Settings → Networking** and generate a domain. Visit the domain and `/health`; health should report `ok: true` and `db: true`.
 
 ## 7. Cloudflare and your domain
 1. Create a Cloudflare account. katbox.org is not registered to you yet, so search for it under Domain Registration and buy it if it is available (do not assume it is). If you buy it elsewhere, add it to Cloudflare and change its nameservers to Cloudflare's.
@@ -74,7 +81,7 @@ git push
 6. Pick one canonical address (for example `https://katbox.org`) and add a Cloudflare redirect rule from `www` to it.
 
 ## 8. Finish
-1. In Railway set `SITE_ORIGIN=https://katbox.org` (exactly what shows in the browser, no trailing slash). The contact form rejects posts from any other origin, so a mismatch gives a 403.
+1. In Railway set `SITE_ORIGIN=https://katbox.org` (or your actual canonical domain, exactly as shown in the browser, with no trailing slash). The contact form rejects posts from a different origin, so a mismatch returns 403.
 2. Redeploy.
 
 ## 9. Final production test
@@ -86,7 +93,12 @@ git push
 - Favicon works, and the Blades of Chance button appears once `BLADES_OF_CHANCE_URL` is set.
 - Push a small change to GitHub and confirm Railway redeploys it.
 
-## Not done yet (worth adding later)
-- No email notification when a message arrives. Messages sit in Atlas only.
-- No rate limiting beyond a hidden spam field. Cloudflare Turnstile is a good next step if spam shows up.
-- The Blades of Chance link and real game screenshots are placeholders.
+## Before announcing the site
+- Confirm `/health` returns `{"ok":true,"db":true}` and test the staff Roblox OAuth login and Game Manager on the deployed domain.
+- Confirm Roblox OAuth callback URLs match the deployed domain exactly.
+- Rotate any database password or OAuth secret that was ever shared in chat, logs, or a public repository; update Railway Variables afterward.
+
+## Known limitations
+- No email notification when a message arrives; messages are stored in MongoDB Atlas.
+- No rate limiting beyond the hidden spam field. Add Cloudflare Turnstile or equivalent if spam becomes a problem.
+- Verify the Blades of Chance URL and replace any placeholder game imagery/content before public launch.
