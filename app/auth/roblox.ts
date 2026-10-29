@@ -92,7 +92,7 @@ export function beginRobloxLogin(request: Request): Response {
   const state = randomBytes(32).toString('base64url')
   const verifier = randomBytes(32).toString('base64url')
   const pkceChallenge = createHashChallenge(verifier)
-  const callback = new URL('/auth/roblox/callback', request.url).toString()
+  const callback = new URL('/auth/roblox/callback', process.env.SITE_ORIGIN?.trim() || request.url).toString()
   const url = new URL(AUTHORIZE_URL)
   url.searchParams.set('client_id', clientId)
   url.searchParams.set('redirect_uri', callback)
