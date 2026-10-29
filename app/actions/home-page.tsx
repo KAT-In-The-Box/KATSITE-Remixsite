@@ -46,6 +46,10 @@ export function HomePage(handle: Handle<HomePageProps>) {
           WebkitFontSmoothing: 'antialiased',
           '& a': { color: 'inherit' },
           '& :focus-visible': { outline: '2px solid var(--accent)', outlineOffset: '3px' },
+          '@keyframes katbox-title-shimmer': {
+            '0%, 100%': { backgroundPosition: '100% 50%', filter: 'drop-shadow(0 3px 18px rgba(127,184,235,.12))' },
+            '50%': { backgroundPosition: '0% 50%', filter: 'drop-shadow(0 3px 30px rgba(155,207,255,.30))' },
+          },
           '@keyframes katbox-pill-float': {
             '0%, 100%': { transform: 'translate3d(var(--follow-x, 0px), var(--follow-y, 0px), 0) translateY(0px)' },
             '50%': { transform: 'translate3d(var(--follow-x, 0px), var(--follow-y, 0px), 0) translateY(-5px)' },
@@ -464,7 +468,19 @@ function Hero() {
             textShadow: '0 4px 32px rgba(0,0,0,.5)',
           })}
         >
-          Games worth climbing into.
+          <span mix={css({
+            display: 'inline-block',
+            backgroundImage: 'linear-gradient(108deg, #f7fbff 0%, #c5e3ff 19%, #ffffff 31%, #83b9ee 43%, #eef8ff 55%, #a6d2fa 68%, #ffffff 81%, #d5eaff 100%)',
+            backgroundSize: '240% 100%',
+            backgroundPosition: '100% 50%',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            color: 'transparent',
+            filter: 'drop-shadow(0 3px 22px rgba(127,184,235,.18))',
+            animation: 'katbox-title-shimmer 8s ease-in-out infinite',
+            '@media (prefers-reduced-motion: reduce)': { animation: 'none', backgroundPosition: '50% 50%' },
+          })}>Games worth climbing into.</span>
         </h1>
         <p mix={css({ margin: '24px auto 0', maxWidth: '760px', fontSize: 'clamp(16px, 1.8vw, 21px)', color: '#e4ebf3', textShadow: '0 2px 16px rgba(0,0,0,.8)' })}>
           KaTBox Interactive makes games under the Roblox Metaverse, from the first prototype through live
