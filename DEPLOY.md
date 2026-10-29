@@ -35,10 +35,10 @@ npm run typecheck
 5. Put it in `.env`:
    ```
    MONGODB_URI=mongodb+srv://user:password@cluster.xxxxx.mongodb.net/?retryWrites=true&w=majority
-   MONGODB_DB=katbox
+   MONGODB_DB=KatBox
    ```
    If the password has special characters (`@ : / ?`), URL-encode them.
-6. Run `npm run dev`, send a message through the form, and look in Atlas, Browse Collections, `katbox.messages`. Also open http://localhost:44100/health and expect `{"ok":true,"db":true}`.
+6. Run `npm run dev`, send a message through the form, and look in Atlas, Browse Collections, `KatBox.messages`. Also open http://localhost:44100/health and expect `{"ok":true,"db":true}`.
 
 ## 5. Push everything to GitHub
 ```
