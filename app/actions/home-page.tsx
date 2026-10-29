@@ -280,7 +280,6 @@ function Hero() {
         </p>
         <h1
           mix={css({
-            margin: 0,
             fontFamily: DISPLAY_FONT,
             fontSize: 'clamp(56px, 9vw, 118px)',
             lineHeight: 1,
