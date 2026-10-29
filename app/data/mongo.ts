@@ -64,19 +64,23 @@ export interface ManagedGame extends RobloxGameMetadata {
   placeUrl: string
   status: GameStatus
   featured?: boolean
+  featuredOrder?: number | null
+  sortOrder?: number
   createdAt: Date
   updatedAt: Date
 }
 
 export async function listManagedGames(): Promise<ManagedGame[]> {
   if (!db) return []
-  return db.collection<ManagedGame>(config.mongodbGamesCollection).find({}).sort({ updatedAt: -1, name: 1 }).toArray()
+  return db.collection<ManagedGame>(config.mongodbGamesCollection).find({}).sort({ sortOrder: 1, updatedAt: -1, name: 1 }).toArray()
 }
 
 export async function createManagedGame(input: Pick<ManagedGame, 'placeUrl' | 'status'> & RobloxGameMetadata): Promise<void> {
   if (!db) throw new Error('MongoDB is not connected. Configure MONGODB_URI to save games.')
   const now = new Date()
-  await db.collection<ManagedGame>(config.mongodbGamesCollection).insertOne({ ...input, createdAt: now, updatedAt: now })
+  const collection = db.collection<ManagedGame>(config.mongodbGamesCollection)
+  const last = await collection.find({}).sort({ sortOrder: -1 }).limit(1).next()
+  await collection.insertOne({ ...input, sortOrder: (last?.sortOrder ?? -1) + 1, featuredOrder: null, createdAt: now, updatedAt: now })
 }
 
 export async function updateManagedGameMetadata(id: string, metadata: RobloxGameMetadata): Promise<void> {
@@ -86,15 +90,34 @@ export async function updateManagedGameMetadata(id: string, metadata: RobloxGame
   await db.collection<ManagedGame>(config.mongodbGamesCollection).updateOne({ _id: new ObjectId(id) }, { $set: { ...metadata, updatedAt: new Date() } })
 }
 
-export async function setFeaturedManagedGame(id: string): Promise<void> {
+export async function setFeaturedManagedGame(id: string, slot: number | null): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(id)) throw new Error('Invalid game ID.')
+  if (slot !== null && (!Number.isInteger(slot) || slot < 1 || slot > 3)) throw new Error('Choose one of the three featured slots.')
+  const collection = db.collection<ManagedGame>(config.mongodbGamesCollection)
+  const selected = await collection.findOne({ _id: new ObjectId(id) })
+  if (!selected) throw new Error('Game was not found.')
+  if (slot !== null) await collection.updateMany({ featuredOrder: slot }, { $set: { featuredOrder: null, featured: false } })
+  await collection.updateOne({ _id: new ObjectId(id) }, { $set: { featuredOrder: slot, featured: slot !== null, updatedAt: new Date() } })
+}
+
+export async function moveManagedGame(id: string, direction: 'up' | 'down'): Promise<void> {
   if (!db) throw new Error('MongoDB is not connected.')
   const { ObjectId } = await import('mongodb')
   if (!ObjectId.isValid(id)) throw new Error('Invalid game ID.')
   const collection = db.collection<ManagedGame>(config.mongodbGamesCollection)
-  const selected = await collection.findOne({ _id: new ObjectId(id) })
-  if (!selected) throw new Error('Game was not found.')
-  await collection.updateMany({}, { $set: { featured: false } })
-  await collection.updateOne({ _id: new ObjectId(id) }, { $set: { featured: true, updatedAt: new Date() } })
+  const games = await collection.find({}).sort({ sortOrder: 1, updatedAt: -1, name: 1 }).toArray()
+  const index = games.findIndex((game) => String(game._id) === id)
+  if (index < 0) throw new Error('Game was not found.')
+  const target = index + (direction === 'up' ? -1 : 1)
+  if (target < 0 || target >= games.length) return
+  const current = games[index]
+  const other = games[target]
+  const currentOrder = current.sortOrder ?? index
+  const otherOrder = other.sortOrder ?? target
+  await collection.updateOne({ _id: current._id }, { $set: { sortOrder: otherOrder, updatedAt: new Date() } })
+  await collection.updateOne({ _id: other._id }, { $set: { sortOrder: currentOrder, updatedAt: new Date() } })
 }
 
 export async function updateManagedGameStatus(id: string, status: GameStatus): Promise<void> {
