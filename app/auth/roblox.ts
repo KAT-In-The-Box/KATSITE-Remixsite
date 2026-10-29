@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 
 const AUTHORIZE_URL = 'https://apis.roblox.com/oauth/v1/authorize'
 const TOKEN_URL = 'https://apis.roblox.com/oauth/v1/token'
@@ -91,8 +91,6 @@ export function beginRobloxLogin(request: Request): Response {
 
   const state = randomBytes(32).toString('base64url')
   const verifier = randomBytes(32).toString('base64url')
-  const challenge = createHmac('sha256', '').update('').digest() // replaced below with the PKCE SHA-256 challenge
-  void challenge
   const pkceChallenge = createHashChallenge(verifier)
   const callback = new URL('/auth/roblox/callback', request.url).toString()
   const url = new URL(AUTHORIZE_URL)
@@ -111,7 +109,7 @@ export function beginRobloxLogin(request: Request): Response {
 
 function createHashChallenge(verifier: string): string {
   // RFC 7636 requires a SHA-256 digest, encoded as base64url.
-  return createHmac('sha256', 'pkce').update(verifier).digest('base64url')
+  return createHash('sha256').update(verifier).digest('base64url')
 }
 
 export async function finishRobloxLogin(request: Request): Promise<Response> {
