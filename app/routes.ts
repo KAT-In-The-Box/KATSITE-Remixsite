@@ -4,6 +4,7 @@ export const routes = route({
   assets: get('/assets/*path'),
   home: '/',
   games: get('/games'),
+  careers: get('/careers'),
   health: get('/health'),
   contact: { method: 'POST', pattern: '/contact' },
   robloxLogin: get('/auth/roblox/login'),
