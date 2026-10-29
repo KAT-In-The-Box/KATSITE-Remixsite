@@ -3,6 +3,7 @@ import { css } from 'remix/component'
 
 import { routes } from '../routes.ts'
 import { Document } from './document.tsx'
+import type { ManagedGame } from '../data/mongo.ts'
 
 export interface ContactValues {
   name: string
@@ -12,6 +13,7 @@ export interface ContactValues {
 
 export interface HomePageProps {
   bladesOfChanceUrl?: string
+  managedGames?: ManagedGame[]
   values?: ContactValues
   errors?: Partial<Record<keyof ContactValues, string>>
   sent?: boolean
@@ -49,7 +51,7 @@ export function HomePage(handle: Handle<HomePageProps>) {
         <SiteHeader />
         <main>
           <Hero />
-          <Games bladesOfChanceUrl={handle.props.bladesOfChanceUrl} />
+          <Games bladesOfChanceUrl={handle.props.bladesOfChanceUrl} managedGames={handle.props.managedGames} />
           <About />
           <Contact
             values={handle.props.values}
@@ -356,9 +358,10 @@ function SectionHeading(handle: Handle<{ id: string; kicker: string; children: R
   )
 }
 
-function Games(handle: Handle<{ bladesOfChanceUrl?: string }>) {
+function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: ManagedGame[] }>) {
   return () => {
     let url = handle.props.bladesOfChanceUrl
+    let managedGames = (handle.props.managedGames ?? []).filter((game) => game.status !== 'Archived' && game.status !== 'Paused')
     return (
       <section
         id="games"
@@ -376,72 +379,98 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string }>) {
             '@media (max-width: 760px)': { gridTemplateColumns: 'minmax(0, 1fr)' },
           })}
         >
-          <article mix={card}>
-            <div
-              aria-hidden="true"
-              mix={css({
-                height: '200px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #3a2819 0%, #17100a 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              })}
-            >
-              <img
-                src="/katbox-mascot.png"
-                alt=""
-                width="900"
-                height="981"
-                mix={css({ display: 'block', height: '150px', width: 'auto' })}
-              />
-            </div>
-            <h3 mix={css({ margin: '20px 0 8px', fontSize: '26px' })}>Blades of Chance</h3>
-            <p mix={css({ margin: 0, color: 'var(--muted)' })}>
-              A Roblox experience developed by the KaTBox team.
-            </p>
-            <div mix={css({ marginTop: '24px' })}>
-              {url ? (
-                <a
-                  href={url}
-                  rel="noopener"
-                  mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}
+          {managedGames.length > 0 ? managedGames.map((game) => (
+            <article key={String(game._id ?? game.name)} mix={card}>
+              <div
+                aria-hidden="true"
+                mix={css({
+                  minHeight: '140px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #3a2819 0%, #17100a 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '24px',
+                })}
+              >
+                <span mix={css({ fontFamily: DISPLAY_FONT, fontSize: 'clamp(28px, 4vw, 44px)', textAlign: 'center', lineHeight: 1.1 })}>
+                  {game.name}
+                </span>
+              </div>
+              <p mix={css({ margin: '20px 0 0', color: 'var(--accent)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' })}>
+                {game.status}
+              </p>
+              <h3 mix={css({ margin: '6px 0 8px', fontSize: '26px' })}>{game.name}</h3>
+              <p mix={css({ margin: 0, color: 'var(--muted)' })}>
+                {game.description || 'A Roblox experience developed by the KaTBox team.'}
+              </p>
+              <div mix={css({ marginTop: '24px' })}>
+                {game.status === 'Live' ? (
+                  <a href={game.placeUrl} target="_blank" rel="noopener noreferrer" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}>
+                    Play on Roblox
+                  </a>
+                ) : (
+                  <span mix={css({ color: 'var(--muted)', fontSize: '15px' })}>In development</span>
+                )}
+              </div>
+            </article>
+          )) : (
+            <>
+              <article mix={card}>
+                <div
+                  aria-hidden="true"
+                  mix={css({
+                    height: '200px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #3a2819 0%, #17100a 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  })}
                 >
-                  Play on Roblox
-                </a>
-              ) : (
-                <span mix={css({ color: 'var(--muted)', fontSize: '15px' })}>Link coming soon</span>
-              )}
-            </div>
-          </article>
-          <article
-            mix={[
-              card,
-              css({
-                borderStyle: 'dashed',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                minHeight: '280px',
-              }),
-            ]}
-          >
-            <p
-              mix={css({
-                margin: 0,
-                fontSize: '13px',
-                fontWeight: 700,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                color: 'var(--muted)',
-              })}
-            >
-              In development
-            </p>
-            <h3 mix={css({ margin: '12px 0 8px', fontSize: '26px' })}>Next game</h3>
-            <p mix={css({ margin: 0, color: 'var(--muted)' })}>
-              More from KaTBox is on the way. Get in touch if you want to hear first.
-            </p>
-          </article>
+                  <img
+                    src="/katbox-mascot.png"
+                    alt=""
+                    width="900"
+                    height="981"
+                    mix={css({ display: 'block', height: '150px', width: 'auto' })}
+                  />
+                </div>
+                <h3 mix={css({ margin: '20px 0 8px', fontSize: '26px' })}>Blades of Chance</h3>
+                <p mix={css({ margin: 0, color: 'var(--muted)' })}>
+                  A Roblox experience developed by the KaTBox team.
+                </p>
+                <div mix={css({ marginTop: '24px' })}>
+                  {url ? (
+                    <a href={url} rel="noopener" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}>
+                      Play on Roblox
+                    </a>
+                  ) : (
+                    <span mix={css({ color: 'var(--muted)', fontSize: '15px' })}>Link coming soon</span>
+                  )}
+                </div>
+              </article>
+              <article
+                mix={[
+                  card,
+                  css({
+                    borderStyle: 'dashed',
+                    justifyContent: 'center',
+                    alignItems: 'flex-start',
+                    minHeight: '280px',
+                  }),
+                ]}
+              >
+                <p mix={css({ margin: 0, fontSize: '13px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)' })}>
+                  In development
+                </p>
+                <h3 mix={css({ margin: '12px 0 8px', fontSize: '26px' })}>Next game</h3>
+                <p mix={css({ margin: 0, color: 'var(--muted)' })}>
+                  More from KaTBox is on the way. Get in touch if you want to hear first.
+                </p>
+              </article>
+            </>
+          )}
         </div>
       </section>
     )
