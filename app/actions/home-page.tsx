@@ -20,7 +20,7 @@ export interface HomePageProps {
 
 const BODY_FONT = "'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif"
 const DISPLAY_FONT = "'Pirata One', 'Space Grotesk', Georgia, serif"
-const BRAND_FONT = "'Oxanium', 'Space Grotesk', sans-serif"
+const BRAND_FONT = "'Pirata One', 'Space Grotesk', serif"
 
 export function HomePage(handle: Handle<HomePageProps>) {
   return () => (
@@ -76,7 +76,7 @@ function HomeHead() {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Pirata+One&family=Space+Grotesk:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Space+Grotesk:wght@400;500;700&display=swap"
       />
     </>
   )
