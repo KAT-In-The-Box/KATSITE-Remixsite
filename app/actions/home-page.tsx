@@ -373,69 +373,63 @@ function Games(handle: Handle<{ bladesOfChanceUrl?: string; managedGames?: Manag
     let url = handle.props.bladesOfChanceUrl
     let managedGames = (handle.props.managedGames ?? []).filter((game) => game.status !== 'Archived' && game.status !== 'Paused')
     return (
-      <section
-        id="games"
-        aria-labelledby="games-title"
-        mix={[wrap, css({ padding: '72px 24px', borderTop: '1px solid var(--line)' })]}
-      >
-        <SectionHeading id="games-title" kicker="Our games">
-          Experiences
-        </SectionHeading>
-        <div mix={css({ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '20px', '@media (max-width: 760px)': { gridTemplateColumns: 'minmax(0, 1fr)' } })}>
+      <section id="games" aria-labelledby="games-title" mix={[wrap, css({ padding: '64px 24px', borderTop: '1px solid var(--line)' })]}>
+        <SectionHeading id="games-title" kicker="Our games">Experiences</SectionHeading>
+        <div mix={css({ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px', '@media (max-width: 760px)': { gridTemplateColumns: 'minmax(0, 1fr)' } })}>
           {managedGames.length > 0 ? managedGames.map((game) => (
-            <article key={String(game._id ?? game.name)} mix={[card, css({ overflow: 'hidden', padding: 0 })]}>
-              <div mix={css({ position: 'relative', height: 'clamp(170px, 25vw, 260px)', background: 'linear-gradient(135deg, #3a2819 0%, #17100a 100%)', overflow: 'hidden' })}>
-                {game.bannerUrl ? (
-                  <img src={game.bannerUrl} alt={game.name + ' banner'} loading="lazy" mix={css({ width: '100%', height: '100%', objectFit: 'cover', display: 'block' })} />
-                ) : (
-                  <div mix={css({ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: DISPLAY_FONT, fontSize: 'clamp(30px, 4vw, 48px)', textAlign: 'center', lineHeight: 1.1 })}>{game.name}</div>
-                )}
-                <span mix={css({ position: 'absolute', left: '16px', bottom: '14px', padding: '6px 10px', borderRadius: '999px', background: 'rgba(0,0,0,.82)', color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,.18)' })}>{game.status}</span>
+            <article key={String(game._id ?? game.name)} mix={[card, css({ overflow: 'hidden', padding: 0, gap: 0 })]}>
+              <div mix={css({ position: 'relative', height: 'clamp(135px, 19vw, 205px)', background: 'linear-gradient(135deg, #3a2819 0%, #17100a 100%)', overflow: 'hidden' })}>
+                {game.bannerUrl ? <img src={game.bannerUrl} alt={game.name + ' banner'} loading="lazy" mix={css({ width: '100%', height: '100%', objectFit: 'cover', display: 'block' })} /> : <div mix={css({ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: DISPLAY_FONT, fontSize: 'clamp(26px, 4vw, 42px)', textAlign: 'center', lineHeight: 1.1 })}>{game.name}</div>}
+                <span mix={css({ position: 'absolute', left: '12px', bottom: '12px', padding: '5px 9px', borderRadius: '999px', background: 'rgba(0,0,0,.82)', color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,.18)' })}>{game.status}</span>
               </div>
-              <div mix={css({ padding: '20px' })}>
-                <div mix={css({ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '-42px', position: 'relative', marginBottom: '14px' })}>
-                  {game.iconUrl ? <img src={game.iconUrl} alt={game.name + ' icon'} loading="lazy" mix={css({ width: '76px', height: '76px', objectFit: 'cover', borderRadius: '18px', border: '3px solid var(--surface)', background: 'var(--surface)', boxShadow: '0 8px 25px rgba(0,0,0,.45)' })} /> : <div aria-hidden="true" mix={css({ width: '76px', height: '76px', borderRadius: '18px', border: '3px solid var(--surface)', background: '#21160f' })} />}
-                  <div mix={css({ paddingTop: '38px', minWidth: 0 })}>
-                    <p mix={css({ margin: 0, color: 'var(--accent)', fontSize: '11px', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' })}>{game.genre || 'Roblox experience'}</p>
-                    <h3 mix={css({ margin: '3px 0 0', fontSize: 'clamp(21px, 3vw, 27px)', lineHeight: 1.15, overflowWrap: 'anywhere' })}>{game.name}</h3>
+              <div mix={css({ padding: '15px 16px 16px' })}>
+                <div mix={css({ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', minWidth: 0 })}>
+                  {game.iconUrl ? <img src={game.iconUrl} alt={game.name + ' icon'} loading="lazy" mix={css({ width: '58px', height: '58px', flexShrink: 0, objectFit: 'cover', borderRadius: '14px', border: '2px solid var(--line)', background: 'var(--surface)' })} /> : <div aria-hidden="true" mix={css({ width: '58px', height: '58px', flexShrink: 0, borderRadius: '14px', background: '#21160f' })} />}
+                  <div mix={css({ minWidth: 0, flex: 1 })}>
+                    <p mix={css({ margin: '0 0 3px', color: 'var(--accent)', fontSize: '10px', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' })}>{game.genre || 'Roblox experience'}</p>
+                    <h3 mix={css({ margin: 0, fontSize: 'clamp(20px, 2.5vw, 25px)', lineHeight: 1.15, overflowWrap: 'anywhere' })}>{game.name}</h3>
+                    <p mix={css({ margin: '4px 0 0', color: 'var(--muted)', fontSize: '12px' })}>By {game.creatorName || 'KaTBox Interactives'}</p>
                   </div>
                 </div>
-                <p mix={css({ margin: '0 0 18px', color: 'var(--muted)', fontSize: '14px', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' })}>{game.description || 'A Roblox experience developed by the KaTBox team.'}</p>
-                <div mix={css({ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px', margin: '0 0 18px' })}>
+                <p mix={css({ margin: '0 0 14px', color: 'var(--muted)', fontSize: '13px', lineHeight: 1.55, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' })}>{game.description || 'A Roblox experience developed by the KaTBox team.'}</p>
+                <div mix={css({ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '7px', marginBottom: '12px' })}>
                   {[
                     { label: 'Playing', value: formatGameNumber(game.playing ?? 0) },
                     { label: 'Visits', value: formatGameNumber(game.visits ?? 0) },
                     { label: 'Favorites', value: formatGameNumber(game.favorites ?? 0) },
                   ].map((stat) => (
-                    <div key={stat.label} mix={css({ minWidth: 0, padding: '12px 10px', border: '1px solid var(--line)', borderRadius: '12px', background: 'rgba(255,255,255,.02)' })}>
-                      <div mix={css({ fontSize: 'clamp(16px, 2.5vw, 22px)', fontWeight: 700, lineHeight: 1.2, overflowWrap: 'anywhere' })}>{stat.value}</div>
-                      <div mix={css({ marginTop: '4px', color: 'var(--muted)', fontSize: '10px', letterSpacing: '.06em', textTransform: 'uppercase' })}>{stat.label}</div>
+                    <div key={stat.label} mix={css({ minWidth: 0, padding: '9px 10px', border: '1px solid var(--line)', borderRadius: '10px', background: 'rgba(255,255,255,.02)' })}>
+                      <div mix={css({ fontSize: 'clamp(15px, 2vw, 20px)', fontWeight: 700, lineHeight: 1.2, overflowWrap: 'anywhere' })}>{stat.value}</div>
+                      <div mix={css({ marginTop: '3px', color: 'var(--muted)', fontSize: '9px', letterSpacing: '.06em', textTransform: 'uppercase' })}>{stat.label}</div>
                     </div>
                   ))}
                 </div>
-                <dl mix={css({ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px 16px', margin: '0 0 20px', fontSize: '12px' })}>
-                  <div><dt mix={css({ color: 'var(--muted)', marginBottom: '2px' })}>Creator</dt><dd mix={css({ margin: 0, overflowWrap: 'anywhere' })}>{game.creatorName || 'KaTBox Interactives'}</dd></div>
-                  <div><dt mix={css({ color: 'var(--muted)', marginBottom: '2px' })}>Max players</dt><dd mix={css({ margin: 0 })}>{formatGameNumber(game.maxPlayers ?? 0)}</dd></div>
-                  <div><dt mix={css({ color: 'var(--muted)', marginBottom: '2px' })}>Created</dt><dd mix={css({ margin: 0 })}>{formatGameDate(game.created)}</dd></div>
-                  <div><dt mix={css({ color: 'var(--muted)', marginBottom: '2px' })}>Last updated</dt><dd mix={css({ margin: 0 })}>{formatGameDate(game.updated)}</dd></div>
-                </dl>
-                <div mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' })}>
-                  <span mix={css({ color: 'var(--muted)', fontSize: '11px' })}>Live Roblox stats · refresh automatically</span>
-                  {game.status === 'Live' ? <a href={game.placeUrl} target="_blank" rel="noopener noreferrer" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}>Play on Roblox ↗</a> : <span mix={css({ color: 'var(--muted)', fontSize: '13px' })}>In development</span>}
+                <div mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' })}>
+                  {game.status === 'Live' ? <a href={game.placeUrl} target="_blank" rel="noopener noreferrer" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)', padding: '10px 14px', fontSize: '13px' })]}>Play on Roblox ↗</a> : <span mix={css({ color: 'var(--muted)', fontSize: '12px' })}>In development</span>}
+                  <span mix={css({ color: 'var(--muted)', fontSize: '10px' })}>Stats refresh automatically</span>
                 </div>
+                <details mix={css({ marginTop: '13px', borderTop: '1px solid var(--line)', paddingTop: '10px', color: 'var(--muted)', fontSize: '12px' })}>
+                  <summary mix={css({ cursor: 'pointer', color: 'var(--text)', fontWeight: 600, userSelect: 'none' })}>Full game details</summary>
+                  <dl mix={css({ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px', margin: '12px 0 2px' })}>
+                    <div><dt>Creator</dt><dd mix={css({ margin: '3px 0 0', color: 'var(--text)', overflowWrap: 'anywhere' })}>{game.creatorName || 'Unknown'}</dd></div>
+                    <div><dt>Creator type</dt><dd mix={css({ margin: '3px 0 0', color: 'var(--text)' })}>{game.creatorType || 'Unknown'}</dd></div>
+                    <div><dt>Max players</dt><dd mix={css({ margin: '3px 0 0', color: 'var(--text)' })}>{formatGameNumber(game.maxPlayers ?? 0)}</dd></div>
+                    <div><dt>Created</dt><dd mix={css({ margin: '3px 0 0', color: 'var(--text)' })}>{formatGameDate(game.created)}</dd></div>
+                    <div><dt>Last updated</dt><dd mix={css({ margin: '3px 0 0', color: 'var(--text)' })}>{formatGameDate(game.updated)}</dd></div>
+                    <div><dt>Place ID</dt><dd mix={css({ margin: '3px 0 0', color: 'var(--text)' })}>{game.placeId}</dd></div>
+                  </dl>
+                </details>
               </div>
             </article>
           )) : (
             <>
               <article mix={card}>
-                <div aria-hidden="true" mix={css({ height: '200px', borderRadius: '12px', background: 'linear-gradient(135deg, #3a2819 0%, #17100a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' })}>
-                  <img src="/katbox-mascot.png" alt="" width="900" height="981" mix={css({ display: 'block', height: '150px', width: 'auto' })} />
-                </div>
+                <div aria-hidden="true" mix={css({ height: '180px', borderRadius: '12px', background: 'linear-gradient(135deg, #3a2819 0%, #17100a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' })}><img src="/katbox-mascot.png" alt="" width="900" height="981" mix={css({ display: 'block', height: '135px', width: 'auto' })} /></div>
                 <h3 mix={css({ margin: '20px 0 8px', fontSize: '26px' })}>Blades of Chance</h3>
                 <p mix={css({ margin: 0, color: 'var(--muted)' })}>A Roblox experience developed by the KaTBox team.</p>
                 <div mix={css({ marginTop: '24px' })}>{url ? <a href={url} rel="noopener" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}>Play on Roblox</a> : <span mix={css({ color: 'var(--muted)', fontSize: '15px' })}>Link coming soon</span>}</div>
               </article>
-              <article mix={[card, css({ borderStyle: 'dashed', justifyContent: 'center', alignItems: 'flex-start', minHeight: '280px' })]}>
+              <article mix={[card, css({ borderStyle: 'dashed', justifyContent: 'center', alignItems: 'flex-start', minHeight: '240px' })]}>
                 <p mix={css({ margin: 0, fontSize: '13px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)' })}>In development</p>
                 <h3 mix={css({ margin: '12px 0 8px', fontSize: '26px' })}>Your next favorite game</h3>
                 <p mix={css({ margin: 0, color: 'var(--muted)' })}>More from KaTBox is on the way.</p>
