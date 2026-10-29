@@ -80,7 +80,7 @@ a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible{outlin
 </div>
 <footer class="footer"><span class="footer-brand">KaTBox Interactives</span><span>Internal staff workspace · Keep it in the box.</span></footer>
 </main></body></html>`, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'" },
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'" },
   })
 }
 
