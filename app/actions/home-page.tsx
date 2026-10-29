@@ -111,23 +111,6 @@ function SiteHeader() {
       })}
     >
       <div
-        onMouseMove={(event: MouseEvent) => {
-          const pill = event.currentTarget as HTMLElement
-          const rect = pill.getBoundingClientRect()
-          const x = (event.clientX - rect.left) / rect.width - 0.5
-          const y = (event.clientY - rect.top) / rect.height - 0.5
-          pill.style.setProperty('--follow-x', `${x * 7}px`)
-          pill.style.setProperty('--follow-y', `${y * 4}px`)
-          pill.style.setProperty('--glow-x', `${((event.clientX - rect.left) / rect.width) * 100}%`)
-          pill.style.setProperty('--glow-y', `${((event.clientY - rect.top) / rect.height) * 100}%`)
-        }}
-        onMouseLeave={(event: MouseEvent) => {
-          const pill = event.currentTarget as HTMLElement
-          pill.style.setProperty('--follow-x', '0px')
-          pill.style.setProperty('--follow-y', '0px')
-          pill.style.setProperty('--glow-x', '50%')
-          pill.style.setProperty('--glow-y', '50%')
-        }}
         mix={css({
           position: 'relative',
           isolation: 'isolate',
@@ -169,7 +152,6 @@ function SiteHeader() {
             backgroundSize: '47px 31px, 71px 43px',
             backgroundPosition: 'var(--particle-shift, 0px 0px), 18px 13px',
             maskImage: 'linear-gradient(115deg, transparent 5%, black 38%, transparent 68%, black 94%)',
-            pointerEvents: 'none',
           },
           '&:hover': {
             animationPlayState: 'paused',
