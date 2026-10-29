@@ -54,7 +54,7 @@ function unseal<T extends Record<string, unknown>>(token: string | undefined): T
 }
 
 function cookies(request: Request): Map<string, string> {
-  return new Map((request.headers.get('Cookie') ?? '').split(';').map((part) => {
+  return new Map<string, string>((request.headers.get('Cookie') ?? '').split(';').map((part): [string, string] => {
     const index = part.indexOf('=')
     return index < 0 ? [part.trim(), ''] : [part.slice(0, index).trim(), part.slice(index + 1).trim()]
   }))
@@ -115,7 +115,7 @@ function createHashChallenge(verifier: string): string {
 export async function finishRobloxLogin(request: Request): Promise<Response> {
   const url = new URL(request.url)
   const error = url.searchParams.get('error')
-  if (error) return new Response('Roblox sign-in was cancelled or denied.', { status: 400 })
+  if (error) return new Response('Roblox sign-in was cancelled or denied.', { status: 400, headers: { 'Set-Cookie': clearOAuthCookie(), 'Cache-Control': 'no-store' } })
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
   const pending = unseal<{ state: string; verifier: string; callback: string }>(cookies(request).get(STATE_COOKIE))
