@@ -1,0 +1,522 @@
+import type { Handle, RemixNode } from 'remix/component'
+import { css } from 'remix/component'
+
+import { routes } from '../routes.ts'
+import { Symbol, Wordmark } from '../ui/logo.tsx'
+import { Document } from './document.tsx'
+
+export interface ContactValues {
+  name: string
+  email: string
+  message: string
+}
+
+export interface HomePageProps {
+  bladesOfChanceUrl?: string
+  values?: ContactValues
+  errors?: Partial<Record<keyof ContactValues, string>>
+  sent?: boolean
+  failed?: boolean
+}
+
+const FONT = "'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif"
+
+export function HomePage(handle: Handle<HomePageProps>) {
+  return () => (
+    <Document head={<HomeHead />} title="INTRIX | Roblox game studio">
+      <div
+        mix={css({
+          '--bg': '#0a0c12',
+          '--surface': '#121620',
+          '--line': '#262c3b',
+          '--ink': '#f2f4f8',
+          '--muted': '#a5adbf',
+          '--accent': '#2ef2d0',
+          '--on-accent': '#0a0c12',
+          '& *, & *::before, & *::after': { boxSizing: 'border-box' },
+          minHeight: '100vh',
+          background: 'var(--bg)',
+          color: 'var(--ink)',
+          fontFamily: FONT,
+          fontSize: '17px',
+          lineHeight: 1.6,
+          WebkitFontSmoothing: 'antialiased',
+          '& a': { color: 'inherit' },
+          '& :focus-visible': { outline: '2px solid var(--accent)', outlineOffset: '3px' },
+        })}
+      >
+        <SiteHeader />
+        <main>
+          <Hero />
+          <Games bladesOfChanceUrl={handle.props.bladesOfChanceUrl} />
+          <About />
+          <Contact
+            values={handle.props.values}
+            errors={handle.props.errors}
+            sent={handle.props.sent}
+            failed={handle.props.failed}
+          />
+        </main>
+        <SiteFooter />
+      </div>
+    </Document>
+  )
+}
+
+function HomeHead() {
+  return () => (
+    <>
+      <meta
+        name="description"
+        content="INTRIX is a Roblox game development studio. Home of Blades of Chance."
+      />
+      <meta name="theme-color" content="#0a0c12" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
+      />
+    </>
+  )
+}
+
+const wrap = css({
+  width: '100%',
+  maxWidth: '1120px',
+  margin: '0 auto',
+  padding: '0 24px',
+})
+
+function SiteHeader() {
+  return () => (
+    <header
+      mix={css({
+        borderBottom: '1px solid var(--line)',
+        background: 'var(--bg)',
+      })}
+    >
+      <div
+        mix={[
+          wrap,
+          css({
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            minHeight: '72px',
+          }),
+        ]}
+      >
+        <a href="/" aria-label="INTRIX home" mix={css({ display: 'block', height: '22px' })}>
+          <Wordmark />
+        </a>
+        <nav
+          aria-label="Primary"
+          mix={css({
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            '& a': {
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: '44px',
+              padding: '0 14px',
+              color: 'var(--muted)',
+              textDecoration: 'none',
+              fontSize: '15px',
+              fontWeight: 500,
+              borderRadius: '8px',
+            },
+            '& a:hover': { color: 'var(--ink)' },
+            '@media (max-width: 560px)': { '& a.hide-sm': { display: 'none' } },
+          })}
+        >
+          <a href="#games" class="hide-sm">Games</a>
+          <a href="#about" class="hide-sm">About</a>
+          <a href="#contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+  )
+}
+
+function Hero() {
+  return () => (
+    <section
+      mix={[
+        wrap,
+        css({
+          position: 'relative',
+          padding: '96px 24px 104px',
+          '@media (max-width: 560px)': { padding: '64px 24px 72px' },
+        }),
+      ]}
+    >
+      <div
+        aria-hidden="true"
+        mix={css({
+          position: 'absolute',
+          right: '24px',
+          top: '56px',
+          height: '320px',
+          color: 'var(--line)',
+          '@media (max-width: 860px)': { display: 'none' },
+        })}
+      >
+        <Symbol />
+      </div>
+      <p
+        mix={css({
+          margin: '0 0 20px',
+          fontSize: '13px',
+          fontWeight: 700,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: 'var(--accent)',
+        })}
+      >
+        Roblox game studio
+      </p>
+      <h1
+        mix={css({
+          margin: 0,
+          maxWidth: '12ch',
+          fontSize: 'clamp(44px, 8vw, 92px)',
+          lineHeight: 1.02,
+          fontWeight: 700,
+          letterSpacing: '-0.02em',
+        })}
+      >
+        We build games worth coming back to.
+      </h1>
+      <p mix={css({ margin: '28px 0 0', maxWidth: '52ch', fontSize: '20px', color: 'var(--muted)' })}>
+        INTRIX is a team making Roblox experiences, from the first prototype through live updates.
+      </p>
+      <div mix={css({ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '40px' })}>
+        <a href="#games" mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}>
+          See our games
+        </a>
+        <a href="#contact" mix={[button, css({ border: '1px solid var(--line)' })]}>
+          Get in touch
+        </a>
+      </div>
+    </section>
+  )
+}
+
+const button = css({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: '48px',
+  padding: '0 24px',
+  borderRadius: '12px',
+  fontFamily: 'inherit',
+  fontSize: '16px',
+  fontWeight: 700,
+  textDecoration: 'none',
+  cursor: 'pointer',
+  border: '1px solid transparent',
+  '&:hover': { filter: 'brightness(1.1)' },
+})
+
+function SectionHeading(handle: Handle<{ id: string; kicker: string; children: RemixNode }>) {
+  return () => (
+    <div mix={css({ marginBottom: '40px' })}>
+      <p
+        mix={css({
+          margin: '0 0 10px',
+          fontSize: '13px',
+          fontWeight: 700,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: 'var(--muted)',
+        })}
+      >
+        {handle.props.kicker}
+      </p>
+      <h2
+        id={handle.props.id}
+        mix={css({
+          margin: 0,
+          fontSize: 'clamp(30px, 4.4vw, 46px)',
+          lineHeight: 1.1,
+          letterSpacing: '-0.01em',
+        })}
+      >
+        {handle.props.children}
+      </h2>
+    </div>
+  )
+}
+
+function Games(handle: Handle<{ bladesOfChanceUrl?: string }>) {
+  return () => {
+    let url = handle.props.bladesOfChanceUrl
+    return (
+      <section
+        id="games"
+        aria-labelledby="games-title"
+        mix={[wrap, css({ padding: '72px 24px', borderTop: '1px solid var(--line)' })]}
+      >
+        <SectionHeading id="games-title" kicker="Our games">
+          Now playing
+        </SectionHeading>
+        <div
+          mix={css({
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            gap: '20px',
+            '@media (max-width: 760px)': { gridTemplateColumns: 'minmax(0, 1fr)' },
+          })}
+        >
+          <article mix={card}>
+            <div
+              aria-hidden="true"
+              mix={css({
+                height: '200px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #14323a 0%, #0f1a26 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--accent)',
+                '& span': { display: 'block', height: '96px' },
+              })}
+            >
+              <span>
+                <Symbol />
+              </span>
+            </div>
+            <h3 mix={css({ margin: '20px 0 8px', fontSize: '26px' })}>Blades of Chance</h3>
+            <p mix={css({ margin: 0, color: 'var(--muted)' })}>
+              Our current Roblox experience, developed and updated by the INTRIX team.
+            </p>
+            <div mix={css({ marginTop: '24px' })}>
+              {url ? (
+                <a
+                  href={url}
+                  rel="noopener"
+                  mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}
+                >
+                  Play on Roblox
+                </a>
+              ) : (
+                <span mix={css({ color: 'var(--muted)', fontSize: '15px' })}>Link coming soon</span>
+              )}
+            </div>
+          </article>
+          <article
+            mix={[
+              card,
+              css({
+                borderStyle: 'dashed',
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                minHeight: '280px',
+              }),
+            ]}
+          >
+            <p mix={css({ margin: 0, fontSize: '13px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)' })}>
+              In development
+            </p>
+            <h3 mix={css({ margin: '12px 0 8px', fontSize: '26px' })}>Next game</h3>
+            <p mix={css({ margin: 0, color: 'var(--muted)' })}>
+              More from INTRIX is on the way. Get in touch if you want to hear first.
+            </p>
+          </article>
+        </div>
+      </section>
+    )
+  }
+}
+
+const card = css({
+  display: 'flex',
+  flexDirection: 'column',
+  padding: '20px',
+  background: 'var(--surface)',
+  border: '1px solid var(--line)',
+  borderRadius: '20px',
+})
+
+function About() {
+  return () => (
+    <section
+      id="about"
+      aria-labelledby="about-title"
+      mix={[wrap, css({ padding: '72px 24px', borderTop: '1px solid var(--line)' })]}
+    >
+      <SectionHeading id="about-title" kicker="The studio">
+        Small team, long-term games
+      </SectionHeading>
+      <div
+        mix={css({
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          gap: '32px',
+          '@media (max-width: 760px)': { gridTemplateColumns: 'minmax(0, 1fr)', gap: '28px' },
+          '& h3': { margin: '0 0 8px', fontSize: '20px' },
+          '& p': { margin: 0, color: 'var(--muted)' },
+        })}
+      >
+        <div>
+          <h3>Built for Roblox</h3>
+          <p>Every INTRIX game is designed around how players actually use the platform.</p>
+        </div>
+        <div>
+          <h3>Live from day one</h3>
+          <p>We ship, watch how people play, and keep improving after launch.</p>
+        </div>
+        <div>
+          <h3>Open to collaboration</h3>
+          <p>Developers, artists and partners are welcome to reach out below.</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Contact(handle: Handle<Pick<HomePageProps, 'values' | 'errors' | 'sent' | 'failed'>>) {
+  return () => {
+    let { values, errors = {}, sent, failed } = handle.props
+    return (
+      <section
+        id="contact"
+        aria-labelledby="contact-title"
+        mix={[wrap, css({ padding: '72px 24px 96px', borderTop: '1px solid var(--line)' })]}
+      >
+        <SectionHeading id="contact-title" kicker="Contact">
+          Say hello
+        </SectionHeading>
+        {sent ? (
+          <p
+            role="status"
+            mix={css({
+              margin: 0,
+              padding: '20px',
+              maxWidth: '640px',
+              border: '1px solid var(--accent)',
+              borderRadius: '12px',
+              fontWeight: 500,
+            })}
+          >
+            Thanks, your message was sent. We will get back to you soon.
+          </p>
+        ) : (
+          <form
+            method="post"
+            action={routes.contact.href()}
+            mix={css({
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              maxWidth: '640px',
+              '& label': { display: 'block', marginBottom: '6px', fontSize: '15px', fontWeight: 500 },
+              '& input, & textarea': {
+                width: '100%',
+                padding: '12px 14px',
+                font: 'inherit',
+                color: 'var(--ink)',
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: '10px',
+              },
+              '& textarea': { minHeight: '160px', resize: 'vertical' },
+              '& .err': { margin: '6px 0 0', color: '#ff9a9a', fontSize: '14px' },
+            })}
+          >
+            {failed && (
+              <p role="alert" class="err" mix={css({ margin: 0 })}>
+                Something went wrong sending your message. Please try again in a minute.
+              </p>
+            )}
+            <div>
+              <label htmlFor="c-name">Name</label>
+              <input
+                id="c-name"
+                name="name"
+                autoComplete="name"
+                required
+                maxLength={80}
+                defaultValue={values?.name ?? ''}
+                aria-invalid={errors.name ? true : undefined}
+                aria-describedby={errors.name ? 'c-name-err' : undefined}
+              />
+              {errors.name && <p id="c-name-err" class="err">{errors.name}</p>}
+            </div>
+            <div>
+              <label htmlFor="c-email">Email</label>
+              <input
+                id="c-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                maxLength={200}
+                defaultValue={values?.email ?? ''}
+                aria-invalid={errors.email ? true : undefined}
+                aria-describedby={errors.email ? 'c-email-err' : undefined}
+              />
+              {errors.email && <p id="c-email-err" class="err">{errors.email}</p>}
+            </div>
+            <div>
+              <label htmlFor="c-message">Message</label>
+              <textarea
+                id="c-message"
+                name="message"
+                required
+                maxLength={2000}
+                defaultValue={values?.message ?? ''}
+                aria-invalid={errors.message ? true : undefined}
+                aria-describedby={errors.message ? 'c-message-err' : undefined}
+              />
+              {errors.message && <p id="c-message-err" class="err">{errors.message}</p>}
+            </div>
+            {/* Honeypot: hidden from people, bots tend to fill it in. */}
+            <div aria-hidden="true" mix={css({ position: 'absolute', left: '-9999px', height: 0, overflow: 'hidden' })}>
+              <label htmlFor="c-website">Leave this empty</label>
+              <input id="c-website" name="website" tabIndex={-1} autoComplete="off" />
+            </div>
+            <div>
+              <button
+                type="submit"
+                mix={[button, css({ background: 'var(--accent)', color: 'var(--on-accent)' })]}
+              >
+                Send message
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
+    )
+  }
+}
+
+function SiteFooter() {
+  return () => (
+    <footer mix={css({ borderTop: '1px solid var(--line)' })}>
+      <div
+        mix={[
+          wrap,
+          css({
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            padding: '32px 24px',
+            color: 'var(--muted)',
+            fontSize: '15px',
+          }),
+        ]}
+      >
+        <span mix={css({ display: 'block', height: '16px', color: 'var(--ink)' })}>
+          <Wordmark />
+        </span>
+        <span>&copy; {new Date().getFullYear()} INTRIX. All rights reserved. Roblox is a trademark of Roblox Corporation.</span>
+      </div>
+    </footer>
+  )
+}
