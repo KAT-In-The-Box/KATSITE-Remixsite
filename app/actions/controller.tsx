@@ -4,7 +4,15 @@ import { createRedirectResponse } from 'remix/response/redirect'
 import { assets } from '../assets.ts'
 import { config } from '../config.ts'
 import { beginRobloxLogin, endStaffSession, finishRobloxLogin, getStaffSession } from '../auth/roblox.ts'
-import { createManagedGame, deleteManagedGame, hasDb, listManagedGames, moveManagedGame, pingDb, saveContactMessage, listContactMessages, updateManagedGameMetadata, updateManagedGameStatus, setFeaturedManagedGame, createStaffConversation, listStaffConversations, listStaffChatMessages, saveStaffChatMessage, type GameStatus } from '../data/mongo.ts'
+import {
+  createManagedGame, deleteManagedGame, hasDb, listManagedGames, moveManagedGame, pingDb,
+  saveContactMessage, listContactMessages, updateManagedGameMetadata, updateManagedGameStatus,
+  setFeaturedManagedGame, createStaffConversation, saveStaffChatMessage, listStaffConversations,
+  listStaffChatMessagesAfter, getStaffChatFile, markStaffConversationRead, touchStaffPresence,
+  setStaffChatMessagePinned, updateStaffConversationDetails, addStaffConversationMembers,
+  removeStaffConversationMember, type GameStatus,
+} from '../data/mongo.ts'
+import { staffChatsPage } from './staff-chats-page.ts'
 import { fetchRobloxGame } from '../data/roblox-games.ts'
 import { routes } from '../routes.ts'
 import { CareersPage, GamesPage, HomePage, type ContactValues } from './home-page.tsx'
@@ -175,28 +183,7 @@ ${!dbReady ? '<div class="notice warning">Database is not connected. Add MONGODB
 }
 
 
-async function staffChatsPage(user: { id: string; name: string }, selectedId = ''): Promise<Response> {
-  const conversations = await listStaffConversations(user.id)
-  const selected = selectedId ? await listStaffChatMessages(selectedId, user.id) : null
-  const active = selectedId ? conversations.find(c => String(c._id) === selectedId) : conversations[0]
-  const messages = selected ?? (active?._id ? await listStaffChatMessages(String(active._id), user.id) : [])
-  const staffIds = (process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\\d+$/.test(v) && v !== user.id)
-  const esc = escapeHtml
-  const list = conversations.map(c => {
-    const id = esc(String(c._id))
-    const title = esc(c.title || 'Conversation')
-    const sub = esc(c.lastMessage || (c.isGroup ? 'Group conversation' : 'No messages yet'))
-    return '<a class="chat-item '+(active && String(active._id)===String(c._id)?'selected':'')+'" href="/staff/chats?id='+id+'"><strong>'+title+'</strong><span>'+sub+'</span></a>'
-  }).join('')
-  const transcript = (messages || []).map(m => '<article class="bubble '+(m.senderId===user.id?'mine':'')+'"><div class="bubble-meta">'+esc(m.senderName)+' · '+esc(new Date(m.createdAt).toLocaleString())+'</div><p>'+esc(m.body)+'</p></article>').join('')
-  const title = active ? esc(active.title) : 'Your conversations'
-  const participants = active ? esc(active.participantIds.map(id => active.participantNames[id] || 'Staff').join(', ')) : ''
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Team Chats | KaTBox</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
-*{box-sizing:border-box}body{margin:0;background:#090909;color:#f4f5f7;font:14px 'Space Grotesk',sans-serif}a{color:inherit;text-decoration:none}.shell{display:grid;grid-template-columns:218px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;padding:18px 12px;background:#0b0b0b;border-right:1px solid #252525;display:flex;flex-direction:column;min-width:0}.side-brand{display:flex;align-items:center;gap:9px;padding:0 8px 22px;border-bottom:1px solid #242424}.side-brand img{width:32px;height:32px;object-fit:contain;flex-shrink:0}.side-brand span{display:grid;line-height:1;min-width:0}.side-brand strong{font:400 23px 'Pirata One',Georgia,serif}.side-brand small{font-size:8px;font-weight:700;letter-spacing:.17em;color:#a9c8e8;margin-top:4px}.side-account{display:flex;align-items:center;gap:10px;padding:20px 7px;min-width:0}.side-avatar{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:50%;background:#1c2734;border:1px solid #35465a;color:#a9c8e8;font-weight:700}.side-account>span:last-child{display:grid;min-width:0}.side-account strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.side-account small{font-size:8px;letter-spacing:.12em;color:#788596}.side-label{margin:15px 8px 7px;color:#78818d;font-size:9px;font-weight:700;letter-spacing:.17em}.side-link{display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:8px;color:#aeb5bf;font-size:12px}.side-link:hover,.side-link.active{background:#202020;color:#fff}.side-bottom{margin-top:auto;padding-top:16px;display:grid;gap:8px;flex-shrink:0}.side-link.site{border:1px solid #303030}.side-bottom button{width:100%;border:1px solid #303030;border-radius:8px;padding:10px;background:transparent;color:#b9b9b9;font:11px 'Space Grotesk',sans-serif;cursor:pointer}.workspace{min-width:0;height:100vh;display:flex;flex-direction:column;padding:28px}.heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.eyebrow{color:#a9c8e8;font-size:10px;font-weight:700;letter-spacing:.16em}.heading h1{font-size:25px;margin:5px 0}.new-btn,button{border:1px solid #536a82;border-radius:8px;background:#a9c8e8;color:#0a1119;padding:10px 14px;font:700 11px 'Space Grotesk';cursor:pointer}.chat-layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:14px;flex:1;min-height:0}.list-panel,.conversation{border:1px solid #292929;border-radius:12px;background:#111;min-height:0}.list-panel{padding:14px;overflow:auto}.list-title{display:flex;justify-content:space-between;margin:0 0 12px;color:#8d96a2;font-size:10px;letter-spacing:.13em}.chat-item{display:block;padding:12px;border-radius:8px;margin-bottom:5px}.chat-item:hover,.chat-item.selected{background:#202a36}.chat-item strong,.chat-item span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.chat-item strong{font-size:12px}.chat-item span{font-size:10px;color:#9299a3;margin-top:5px}.conversation{display:flex;flex-direction:column;overflow:hidden}.conv-head{padding:17px 20px;border-bottom:1px solid #292929}.conv-head strong{font-size:14px}.conv-head small{display:block;color:#8f969f;font-size:10px;margin-top:4px}.transcript{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:12px}.bubble{max-width:min(78%,680px);align-self:flex-start;padding:11px 14px;border:1px solid #30343b;border-radius:10px;background:#1a1c20}.bubble.mine{align-self:flex-end;background:#1b2938;border-color:#354c63}.bubble-meta{font-size:9px;color:#aab6c3;margin-bottom:6px}.bubble p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:12px;line-height:1.6}.composer{display:flex;gap:9px;padding:14px;border-top:1px solid #292929}.composer textarea{flex:1;resize:vertical;min-height:42px;max-height:130px;padding:12px;border:1px solid #34383e;border-radius:8px;background:#090a0c;color:white;font:12px 'Space Grotesk'}.empty{margin:auto;text-align:center;color:#8f969f;font-size:12px;padding:30px}.new-form{padding:14px;border:1px solid #30343b;border-radius:9px;margin-bottom:14px}.new-form label{display:block;font-size:10px;color:#aab6c3;margin:9px 0 5px}.new-form input,.new-form select{width:100%;padding:9px;background:#090a0c;border:1px solid #34383e;border-radius:7px;color:#eee;font:11px 'Space Grotesk'}.new-form select{min-height:100px}.new-form button{margin-top:10px;width:100%}
-@media(max-width:760px){.shell{display:block}.sidebar{position:relative;height:auto;min-height:0;padding:14px 12px;display:flex;gap:0}.side-brand{padding-bottom:12px}.side-account{padding:12px 7px}.side-label{margin:9px 8px 6px}.side-link{padding:9px 10px}.side-bottom{margin-top:12px;padding-top:10px}.workspace{height:auto;min-height:calc(100vh - 160px);padding:16px 12px}.chat-layout{grid-template-columns:1fr;min-height:650px}.list-panel{max-height:260px}.conversation{min-height:380px}.heading{align-items:flex-start;gap:10px}.bubble{max-width:92%}}
-</style></head><body><div class="shell"><aside class="sidebar"><a class="side-brand" href="/staff/games"><img src="/KITBEMOJILarge.png" alt=""><span><strong>KaTBox</strong><small>INTERACTIVES</small></span></a><div class="side-account"><span class="side-avatar">${esc(user.name).charAt(0).toUpperCase()}</span><span><strong>${esc(user.name)}</strong><small>STAFF ACCOUNT</small></span></div><div class="side-label">WORKSPACE</div><a class="side-link" href="/staff/games">▦ <span>Games</span></a><a class="side-link" href="/staff/inbox">▤ <span>Messages</span></a><div class="side-label">STUDIO</div><a class="side-link active" href="/staff/chats">◈ <span>Team Chats</span></a><div class="side-bottom"><a class="side-link site" href="/">↗ <span>View website</span></a><form method="post" action="/auth/roblox/logout"><button type="submit">↪ Sign out</button></form></div></aside><main class="workspace"><header class="heading"><div><div class="eyebrow">KATBOX WORKSPACE / TEAM COMMUNICATION</div><h1>Team Chats</h1></div><button type="button" onclick="document.getElementById('new-chat').hidden=!document.getElementById('new-chat').hidden">＋ New conversation</button></header><div class="chat-layout"><aside class="list-panel"><div id="new-chat" class="new-form" hidden><form method="post" action="/staff/chats/create"><label>Conversation name (optional)</label><input name="title" maxlength="80" placeholder="Project team, or leave blank for DM"><label>Select staff members (Ctrl/Cmd to select multiple)</label><select name="participants" multiple required size="5">${staffIds.map(id=>'<option value="'+esc(id)+'">Staff member · '+esc(id)+'</option>').join('')}</select><button type="submit">Create conversation</button></form></div><div class="list-title"><span>CONVERSATIONS</span><span>${conversations.length}</span></div>${list || '<div class="empty">No conversations yet. Start one above.</div>'}</aside><section class="conversation">${active ? '<div class="conv-head"><strong>'+title+'</strong><small>'+participants+'</small></div><div class="transcript">'+(transcript||'<div class="empty">Say hello to start the conversation.</div>')+'</div><form class="composer" method="post" action="/staff/chats/send"><input type="hidden" name="conversationId" value="'+esc(String(active._id))+'"><textarea name="body" maxlength="4000" required placeholder="Write a message…"></textarea><button type="submit">Send</button></form>' : '<div class="empty">Select a conversation or create a new one to start chatting.</div>'}</section></div></main></div></body></html>`
-  return new Response(html,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"}})
-}
+
 
 export default createController(routes, {
   actions: {
@@ -261,31 +248,160 @@ export default createController(routes, {
     async staffChats(context) {
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
-      try { return await staffChatsPage(user, new URL(context.request.url).searchParams.get('id') || '') }
-      catch (error) { console.error('Failed to load staff chats:', error); return new Response('Team chats unavailable. Check MongoDB.', { status: 503 }) }
+      try {
+        const url = new URL(context.request.url)
+        await touchStaffPresence(user.id, user.name)
+        return await staffChatsPage(user, url.searchParams.get('id') || '', url.searchParams.get('q') || '', url.searchParams.get('mq') || '')
+      } catch (error) {
+        console.error('Failed to load staff chats:', error)
+        return new Response('Team chats unavailable. Check MongoDB.', { status: 503 })
+      }
+    },
+
+    async staffChatUpdates(context) {
+      const user = getStaffSession(context.request)
+      if (!user) return new Response('Unauthorized', { status: 401 })
+      const url = new URL(context.request.url)
+      const id = url.searchParams.get('id') || ''
+      const after = url.searchParams.get('after') || ''
+      try {
+        const messages = await listStaffChatMessagesAfter(id, user.id, after)
+        if (messages === null) return new Response('Not found', { status: 404 })
+        await markStaffConversationRead(id, user.id)
+        const conversations = await listStaffConversations(user.id)
+        return Response.json({
+          messages: messages.map(m => ({ id: String(m._id), senderId: m.senderId, senderName: m.senderName, body: m.body, replyPreview: m.replyPreview, attachments: m.attachments || [], createdAt: m.createdAt })),
+          counts: conversations.map(c => ({ id: String(c._id), unread: c.unreadCounts?.[user.id] || 0, mentions: c.mentionUnreadCounts?.[user.id] || 0 })),
+          totalUnread: conversations.reduce((n, c) => n + (c.unreadCounts?.[user.id] || 0), 0),
+          totalMentions: conversations.reduce((n, c) => n + (c.mentionUnreadCounts?.[user.id] || 0), 0),
+        }, { headers: { 'Cache-Control': 'no-store' } })
+      } catch (error) {
+        console.error('Failed to poll staff chats:', error)
+        return new Response('Could not update messages.', { status: 503 })
+      }
+    },
+
+    async staffChatFile(context) {
+      const user = getStaffSession(context.request)
+      if (!user) return new Response('Unauthorized', { status: 401 })
+      const id = new URL(context.request.url).searchParams.get('id') || ''
+      try {
+        const file = await getStaffChatFile(id, user.id)
+        if (!file) return new Response('File not found.', { status: 404 })
+        const filename = file.name.replace(/["\\r\\n]/g, '_')
+        return new Response(new Uint8Array(file.data), { headers: {
+          'Content-Type': file.mimeType,
+          'Content-Length': String(file.size),
+          'Content-Disposition': 'attachment; filename="' + filename + '"; filename*=UTF-8\\'\\'' + encodeURIComponent(file.name),
+          'X-Content-Type-Options': 'nosniff',
+          'Cache-Control': 'private, no-store',
+          'Content-Security-Policy': "default-src 'none'; sandbox",
+        } })
+      } catch (error) {
+        console.error('Failed to read staff chat attachment:', error)
+        return new Response('Could not download attachment.', { status: 503 })
+      }
+    },
+
+    async staffChatPresence(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return new Response('Unauthorized', { status: 401 })
+      await touchStaffPresence(user.id, user.name)
+      return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } })
     },
 
     async staffChatCreate(context) {
       if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
-      const ids = context.formData.getAll('participants').filter((v): v is string => typeof v === 'string' && /^\d+$/.test(v))
-      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\d+$/.test(v)))
+      const ids = context.formData.getAll('participants').filter((v): v is string => typeof v === 'string' && /^\\d+$/.test(v))
+      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\\d+$/.test(v)))
       if (ids.some(id => !allowed.has(id)) || ids.length < 1) return new Response('Choose at least one approved staff member.', { status: 400 })
-      const names: Record<string,string> = {}
-      try { const response = await fetch('https://users.roblox.com/v1/users', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userIds:ids, excludeBannedUsers:true}), signal:AbortSignal.timeout(8000) }); if(response.ok){ const data=await response.json() as {data?:{id:number,name:string,displayName:string}[]}; for(const p of data.data||[]) names[String(p.id)]=p.displayName || p.name } } catch {}
+      const names: Record<string, string> = {}
+      try {
+        const response = await fetch('https://users.roblox.com/v1/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userIds: ids, excludeBannedUsers: true }), signal: AbortSignal.timeout(8000) })
+        if (response.ok) { const data = await response.json() as { data?: { id: number; name: string; displayName: string }[] }; for (const p of data.data || []) names[String(p.id)] = p.displayName || p.name }
+      } catch {}
       for (const id of ids) names[id] = names[id] || 'Staff ' + id
-      try { const id=await createStaffConversation({creatorId:user.id,creatorName:user.name,participantIds:ids,participantNames:names,title:readText(context.formData,'title')}); return createRedirectResponse('/staff/chats?id='+id,{status:303}) }
-      catch(error){ console.error(error); return new Response(error instanceof Error?error.message:'Could not create conversation.',{status:400}) }
+      try {
+        const id = await createStaffConversation({ creatorId: user.id, creatorName: user.name, participantIds: ids, participantNames: names, title: readText(context.formData, 'title'), description: readText(context.formData, 'description'), icon: readText(context.formData, 'icon') })
+        return createRedirectResponse('/staff/chats?id=' + id, { status: 303 })
+      } catch (error) { console.error(error); return new Response(error instanceof Error ? error.message : 'Could not create conversation.', { status: 400 }) }
     },
 
     async staffChatSend(context) {
       if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
-      const id=readText(context.formData,'conversationId')
-      try { await saveStaffChatMessage({conversationId:id,senderId:user.id,senderName:user.name,body:readText(context.formData,'body')}); return createRedirectResponse('/staff/chats?id='+encodeURIComponent(id),{status:303}) }
-      catch(error){ console.error(error); return new Response(error instanceof Error?error.message:'Could not send message.',{status:400}) }
+      const files = context.formData.getAll('attachments').filter((value): value is File =>
+        typeof value === 'object' && value !== null && 'arrayBuffer' in value && 'size' in value && (value as File).size > 0,
+      )
+      try {
+        const attachments = await Promise.all(files.map(async file => ({
+          name: file.name, mimeType: file.type || 'application/octet-stream', data: Buffer.from(await file.arrayBuffer()),
+        })))
+        const id = readText(context.formData, 'conversationId')
+        await saveStaffChatMessage({
+          conversationId: id, senderId: user.id, senderName: user.name, body: readText(context.formData, 'body'),
+          replyToId: readText(context.formData, 'replyToId') || undefined,
+          mentions: context.formData.getAll('mentions').filter((v): v is string => typeof v === 'string' && /^\\d+$/.test(v)),
+          attachments,
+        })
+        return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 })
+      } catch (error) { console.error(error); return new Response(error instanceof Error ? error.message : 'Could not send message.', { status: 400 }) }
+    },
+
+    async staffChatPin(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const id = readText(context.formData, 'conversationId')
+      try {
+        await setStaffChatMessagePinned(id, readText(context.formData, 'messageId'), user.id, readText(context.formData, 'pinned') === '1')
+        return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 })
+      } catch (error) { return new Response(error instanceof Error ? error.message : 'Could not update pinned message.', { status: 400 }) }
+    },
+
+    async staffChatGroupUpdate(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const id = readText(context.formData, 'conversationId')
+      try {
+        await updateStaffConversationDetails(id, user.id, { title: readText(context.formData, 'title'), description: readText(context.formData, 'description'), icon: readText(context.formData, 'icon') })
+        return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 })
+      } catch (error) { return new Response(error instanceof Error ? error.message : 'Could not update group details.', { status: 400 }) }
+    },
+
+    async staffChatMemberAdd(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const id = readText(context.formData, 'conversationId')
+      const ids = context.formData.getAll('members').filter((v): v is string => typeof v === 'string' && /^\\d+$/.test(v))
+      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\\d+$/.test(v)))
+      if (ids.some(member => !allowed.has(member))) return new Response('Only approved staff can be added.', { status: 400 })
+      const names: Record<string, string> = {}
+      try {
+        const response = await fetch('https://users.roblox.com/v1/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userIds: ids, excludeBannedUsers: true }), signal: AbortSignal.timeout(8000) })
+        if (response.ok) { const data = await response.json() as { data?: { id: number; name: string; displayName: string }[] }; for (const p of data.data || []) names[String(p.id)] = p.displayName || p.name }
+      } catch {}
+      try {
+        await addStaffConversationMembers(id, user.id, ids.map(member => ({ id: member, name: names[member] || 'Staff ' + member })))
+        return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 })
+      } catch (error) { return new Response(error instanceof Error ? error.message : 'Could not add members.', { status: 400 }) }
+    },
+
+    async staffChatMemberRemove(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const id = readText(context.formData, 'conversationId')
+      try {
+        await removeStaffConversationMember(id, user.id, readText(context.formData, 'memberId'))
+        return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 })
+      } catch (error) { return new Response(error instanceof Error ? error.message : 'Could not remove member.', { status: 400 }) }
     },
 
     async staffInbox(context) {
