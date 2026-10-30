@@ -372,7 +372,7 @@ export default createController(routes, {
       const field = readText(context.formData, 'field')
       const enabled = readText(context.formData, 'enabled') === '1'
       if (field !== 'starred' && field !== 'muted') return new Response('Invalid preference.', { status: 400 })
-      try { await setStaffChatPreference(id, user.id, { [field]: enabled }); return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 }) }
+      try { await setStaffChatPreference(id, user.id, field === 'starred' ? { starred: enabled } : { muted: enabled }); return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 }) }
       catch (error) { return new Response(error instanceof Error ? error.message : 'Could not save chat preference.', { status: 400 }) }
     },
     async staffChatGroupUpdate(context) {
