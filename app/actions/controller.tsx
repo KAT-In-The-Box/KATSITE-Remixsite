@@ -270,7 +270,7 @@ export default createController(routes, {
         if (messages.length) await markStaffConversationRead(id, user.id)
         const conversations = await listStaffConversations(user.id)
         return Response.json({
-          messages: messages.map(m => ({ id: String(m._id), senderId: m.senderId, senderName: m.senderName, body: m.body, replyPreview: m.replyPreview, attachments: m.attachments || [], createdAt: m.createdAt })),
+          messages: messages.map(m => ({ id: String(m._id), senderId: m.senderId, senderName: m.senderName, body: m.body, replyPreview: m.replyPreview, attachments: m.attachments || [], mentions: m.mentions || [], createdAt: m.createdAt })),
           counts: conversations.map(c => ({ id: String(c._id), unread: c.unreadCounts?.[user.id] || 0, mentions: c.mentionUnreadCounts?.[user.id] || 0 })),
           totalUnread: conversations.reduce((n, c) => n + (c.unreadCounts?.[user.id] || 0), 0),
           totalMentions: conversations.reduce((n, c) => n + (c.mentionUnreadCounts?.[user.id] || 0), 0),
