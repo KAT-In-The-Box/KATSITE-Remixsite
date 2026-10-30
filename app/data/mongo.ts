@@ -200,9 +200,11 @@ export async function listStaffChatMessagesAfter(conversationId: string, userId:
   if (!ObjectId.isValid(conversationId)) return null
   const conversation = await getStaffConversation(conversationId, userId)
   if (!conversation?._id) return null
-  const filter: Record<string, unknown> = { conversationId: conversation._id }
-  if (afterId && ObjectId.isValid(afterId)) filter._id = { $gt: new ObjectId(afterId) }
-  return db.collection<StaffChatMessage>('staff_chat_messages').find(filter).sort({ _id: 1 }).limit(100).toArray()
+  const collection = db.collection<StaffChatMessage>('staff_chat_messages')
+  const filter = afterId && ObjectId.isValid(afterId)
+    ? { conversationId: conversation._id, _id: { $gt: new ObjectId(afterId) } }
+    : { conversationId: conversation._id }
+  return collection.find(filter).sort({ _id: 1 }).limit(100).toArray()
 }
 export async function searchStaffChatMessages(conversationId: string, userId: string, query: string) {
   if (!db) throw new Error('MongoDB is not connected.')
