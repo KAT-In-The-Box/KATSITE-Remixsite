@@ -153,7 +153,7 @@ export default createController(routes, {
 
     async home(context) {
       let sent = new URL(context.request.url).searchParams.get('sent') === '1'
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       try {
         games = await listManagedGames()
         // Refresh cached public Roblox stats periodically without blocking every page view.
@@ -180,7 +180,7 @@ export default createController(routes, {
     },
 
     async games(context) {
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       try {
         games = await listManagedGames()
         // Only display active portfolio entries; the staff portal retains paused and archived records.
@@ -215,7 +215,7 @@ export default createController(routes, {
     async gameManager(context) {
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       let message = ''
       try {
         games = await listManagedGames()
@@ -257,7 +257,7 @@ export default createController(routes, {
           message = error instanceof Error ? error.message : 'Could not import the Roblox game. Check the URL and try again.'
         }
       }
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       try { games = await listManagedGames() } catch { /* Show the form and actionable error. */ }
       return gameManagerPage(user.name, games, message)
     },
@@ -281,7 +281,7 @@ export default createController(routes, {
         console.error('Failed to refresh Roblox game:', error)
         message = error instanceof Error ? error.message : 'Could not refresh Roblox details.'
       }
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
       return gameManagerPage(user.name, games, message)
     },
@@ -296,7 +296,7 @@ export default createController(routes, {
       const slot = rawSlot === '' || rawSlot === '0' ? null : Number(rawSlot)
       try { await setFeaturedManagedGame(id, slot); message = slot === null ? 'Game removed from featured slots.' : `Featured slot 0${slot} updated.` }
       catch (error) { console.error('Failed to set featured game:', error); message = error instanceof Error ? error.message : 'Could not set featured game.' }
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
       return gameManagerPage(user.name, games, message)
     },
@@ -313,7 +313,7 @@ export default createController(routes, {
         try { await moveManagedGame(id, direction); message = 'Game order updated.' }
         catch (error) { console.error('Failed to reorder games:', error); message = error instanceof Error ? error.message : 'Could not reorder games.' }
       }
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
       return gameManagerPage(user.name, games, message)
     },
@@ -332,7 +332,7 @@ export default createController(routes, {
         try { await updateManagedGameStatus(id, status); message = 'Game status updated.' }
         catch (error) { console.error('Failed to update game status:', error); message = 'Could not update this game. Check the database connection and try again.' }
       }
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
       return gameManagerPage(user.name, games, message)
     },
@@ -345,7 +345,7 @@ export default createController(routes, {
       let message = ''
       try { await deleteManagedGame(id); message = 'Game removed from your workspace.' }
       catch (error) { console.error('Failed to delete managed game:', error); message = 'Could not delete this game. Check the database connection and try again.' }
-      let games = []
+      let games: Awaited<ReturnType<typeof listManagedGames>> = []
       try { games = await listManagedGames() } catch { /* Keep the error visible. */ }
       return gameManagerPage(user.name, games, message)
     },
