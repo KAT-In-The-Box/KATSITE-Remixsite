@@ -10,7 +10,7 @@ import {
   setFeaturedManagedGame, createStaffConversation, saveStaffChatMessage, listStaffConversations,
   listStaffChatMessagesAfter, getStaffChatFile, markStaffConversationRead, touchStaffPresence,
   setStaffChatMessagePinned, updateStaffConversationDetails, addStaffConversationMembers,
-  removeStaffConversationMember, type GameStatus,
+  removeStaffConversationMember, getStaffChatPreferences, setStaffChatPreference, type GameStatus,
 } from '../data/mongo.ts'
 import { staffChatsPage } from './staff-chats-page.ts'
 import { fetchRobloxGame } from '../data/roblox-games.ts'
@@ -326,7 +326,7 @@ export default createController(routes, {
       } catch {}
       for (const id of ids) names[id] = names[id] || 'Staff ' + id
       try {
-        const id = await createStaffConversation({ creatorId: user.id, creatorName: user.name, participantIds: ids, participantNames: names, title: readText(context.formData, 'title'), description: readText(context.formData, 'description'), icon: readText(context.formData, 'icon') })
+        const id = await createStaffConversation({ creatorId: user.id, creatorName: user.name, participantIds: ids, participantNames: names, title: readText(context.formData, 'title'), description: readText(context.formData, 'description'), icon: readText(context.formData, 'icon'), isChannel: readText(context.formData, 'type') === 'channel', category: readText(context.formData, 'category') || 'General' })
         return createRedirectResponse('/staff/chats?id=' + id, { status: 303 })
       } catch (error) { console.error(error); return new Response(error instanceof Error ? error.message : 'Could not create conversation.', { status: 400 }) }
     },
@@ -364,6 +364,17 @@ export default createController(routes, {
       } catch (error) { return new Response(error instanceof Error ? error.message : 'Could not update pinned message.', { status: 400 }) }
     },
 
+    async staffChatPreference(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const id = readText(context.formData, 'conversationId')
+      const field = readText(context.formData, 'field')
+      const enabled = readText(context.formData, 'enabled') === '1'
+      if (field !== 'starred' && field !== 'muted') return new Response('Invalid preference.', { status: 400 })
+      try { await setStaffChatPreference(id, user.id, { [field]: enabled }); return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 }) }
+      catch (error) { return new Response(error instanceof Error ? error.message : 'Could not save chat preference.', { status: 400 }) }
+    },
     async staffChatGroupUpdate(context) {
       if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
       const user = getStaffSession(context.request)
