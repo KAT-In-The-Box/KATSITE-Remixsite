@@ -239,11 +239,12 @@ function SiteHeader() {
   return () => (
     <header
       mix={css({
-        position: 'relative',
-        zIndex: 10,
+        position: 'sticky',
+        top: '12px',
+        zIndex: 1000,
         padding: '18px 24px 0',
         background: 'transparent',
-        '@media (max-width: 560px)': { padding: '12px 12px 0' },
+        '@media (max-width: 560px)': { top: '8px', padding: '12px 12px 0' },
       })}
     >
       <div
