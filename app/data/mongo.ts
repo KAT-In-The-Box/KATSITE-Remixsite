@@ -24,6 +24,8 @@ export async function connectDb(): Promise<void> {
   await db.collection<ContactMessage>('messages').createIndex({ createdAt: -1 })
   await db.collection<StaffChatMessage>('staff_chat_messages').createIndex({ conversationId: 1, createdAt: 1 })
   await db.collection<StaffConversation>('staff_conversations').createIndex({ participantIds: 1, updatedAt: -1 })
+  await db.collection<StaffChatStoredFile>('staff_chat_files').createIndex({ conversationId: 1, createdAt: -1 })
+  await db.collection<StaffPresence>('staff_presence').createIndex({ lastSeenAt: -1 })
 }
 
 export async function closeDb(): Promise<void> {
@@ -69,6 +71,10 @@ export interface StaffChatMessage {
   senderId: string
   senderName: string
   body: string
+  replyToId?: string
+  replyPreview?: { senderName: string; body: string }
+  mentions?: string[]
+  attachments?: StaffChatAttachment[]
   createdAt: Date
 }
 export interface StaffConversation {
@@ -81,6 +87,12 @@ export interface StaffConversation {
   updatedAt: Date
   lastMessage?: string
   lastSenderName?: string
+  createdBy?: string
+  description?: string
+  icon?: string
+  unreadCounts?: Record<string, number>
+  mentionUnreadCounts?: Record<string, number>
+  pinnedMessageIds?: string[]
 }
 export async function createStaffConversation(input: { creatorId: string; creatorName: string; participantIds: string[]; participantNames: Record<string,string>; title?: string }): Promise<string> {
   if (!db) throw new Error('MongoDB is not connected.')
@@ -91,7 +103,7 @@ export async function createStaffConversation(input: { creatorId: string; creato
   const now = new Date()
   const result = await db.collection<StaffConversation>('staff_conversations').insertOne({
     participantIds: ids, participantNames: { ...input.participantNames, [input.creatorId]: input.creatorName },
-    title, isGroup, createdAt: now, updatedAt: now,
+    title, isGroup, createdBy: input.creatorId, description: '', icon: '', unreadCounts: Object.fromEntries(ids.map(id => [id, 0])), mentionUnreadCounts: Object.fromEntries(ids.map(id => [id, 0])), pinnedMessageIds: [], createdAt: now, updatedAt: now,
   })
   return String(result.insertedId)
 }
@@ -111,18 +123,160 @@ export async function listStaffChatMessages(conversationId: string, userId: stri
   if (!conversation?._id) return null
   return db.collection<StaffChatMessage>('staff_chat_messages').find({ conversationId: conversation._id }).sort({ createdAt: 1 }).limit(500).toArray()
 }
-export async function saveStaffChatMessage(input: { conversationId: string; senderId: string; senderName: string; body: string }) {
+export async function saveStaffChatMessage(input: { conversationId: string; senderId: string; senderName: string; body: string; replyToId?: string; mentions?: string[]; attachments?: Array<{ name: string; mimeType: string; data: Buffer }> }) {
   if (!db) throw new Error('MongoDB is not connected.')
   const { ObjectId } = await import('mongodb')
   if (!ObjectId.isValid(input.conversationId)) throw new Error('Invalid conversation.')
   const conversations = db.collection<StaffConversation>('staff_conversations')
   const conversation = await conversations.findOne({ _id: new ObjectId(input.conversationId), participantIds: input.senderId })
-  if (!conversation) throw new Error('You are not a participant in this conversation.')
+  if (!conversation?._id) throw new Error('You are not a participant in this conversation.')
   const body = input.body.trim()
-  if (!body || body.length > 4000) throw new Error('Messages must be between 1 and 4000 characters.')
+  if ((!body && !input.attachments?.length) || body.length > 4000) throw new Error('Add a message (up to 4000 characters) or an attachment.')
   const now = new Date()
-  await db.collection<StaffChatMessage>('staff_chat_messages').insertOne({ conversationId: conversation._id!, senderId: input.senderId, senderName: input.senderName, body, createdAt: now })
-  await conversations.updateOne({ _id: conversation._id }, { $set: { lastMessage: body.slice(0, 180), lastSenderName: input.senderName, updatedAt: now } })
+  let replyPreview: StaffChatMessage['replyPreview']
+  if (input.replyToId) {
+    if (!ObjectId.isValid(input.replyToId)) throw new Error('Invalid reply target.')
+    const parent = await db.collection<StaffChatMessage>('staff_chat_messages').findOne({ _id: new ObjectId(input.replyToId), conversationId: conversation._id })
+    if (!parent) throw new Error('The message you replied to could not be found.')
+    replyPreview = { senderName: parent.senderName, body: parent.body.slice(0, 180) }
+  }
+  const allowedMentions = [...new Set((input.mentions || []).filter(id => conversation.participantIds.includes(id) && id !== input.senderId))]
+  const messageId = new ObjectId()
+  const attachments: StaffChatAttachment[] = []
+  const files = input.attachments || []
+  if (files.length > 5) throw new Error('Attach up to 5 files per message.')
+  for (const file of files) {
+    if (file.data.length > 5 * 1024 * 1024) throw new Error('Each attachment must be 5 MB or smaller.')
+    if (!/^(image\/(png|jpeg|gif|webp)|application\/pdf|text\/plain|application\/zip|application\/vnd\.openxmlformats-officedocument\.(wordprocessingml\.document|spreadsheetml\.sheet|presentationml\.presentation))$/.test(file.mimeType)) throw new Error('That file type is not supported.')
+    const fileId = new ObjectId()
+    attachments.push({ id: String(fileId), name: file.name.slice(0, 180), mimeType: file.mimeType, size: file.data.length })
+    await db.collection<StaffChatStoredFile>('staff_chat_files').insertOne({ _id: fileId, conversationId: conversation._id, messageId, name: file.name.slice(0, 180), mimeType: file.mimeType, size: file.data.length, data: file.data, uploadedBy: input.senderId, createdAt: now })
+  }
+  await db.collection<StaffChatMessage>('staff_chat_messages').insertOne({
+    _id: messageId, conversationId: conversation._id, senderId: input.senderId, senderName: input.senderName,
+    body, ...(input.replyToId ? { replyToId: input.replyToId } : {}), ...(replyPreview ? { replyPreview } : {}),
+    mentions: allowedMentions, attachments, createdAt: now,
+  })
+  const inc: Record<string, number> = {}
+  for (const participantId of conversation.participantIds) {
+    if (participantId !== input.senderId) inc['unreadCounts.' + participantId] = 1
+    if (allowedMentions.includes(participantId)) inc['mentionUnreadCounts.' + participantId] = 1
+  }
+  await conversations.updateOne({ _id: conversation._id }, {
+    $set: { lastMessage: body.slice(0, 180) || (attachments.length ? '📎 Attachment' : ''), lastSenderName: input.senderName, updatedAt: now, ['unreadCounts.' + input.senderId]: 0, ['mentionUnreadCounts.' + input.senderId]: 0 },
+    ...(Object.keys(inc).length ? { $inc: inc } : {}),
+  })
+  return String(messageId)
+}
+
+export interface StaffChatAttachment { id: string; name: string; mimeType: string; size: number }
+interface StaffChatStoredFile {
+  _id: import('mongodb').ObjectId; conversationId: import('mongodb').ObjectId; messageId: import('mongodb').ObjectId;
+  name: string; mimeType: string; size: number; data: Buffer; uploadedBy: string; createdAt: Date
+}
+interface StaffPresence { _id: string; name: string; lastSeenAt: Date }
+
+
+export async function markStaffConversationRead(conversationId: string, userId: string): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(conversationId)) return
+  await db.collection<StaffConversation>('staff_conversations').updateOne(
+    { _id: new ObjectId(conversationId), participantIds: userId },
+    { $set: { ['unreadCounts.' + userId]: 0, ['mentionUnreadCounts.' + userId]: 0, ['lastReadAtByUser.' + userId]: new Date() } },
+  )
+}
+export async function touchStaffPresence(userId: string, name: string): Promise<void> {
+  if (!db) return
+  await db.collection<StaffPresence>('staff_presence').updateOne({ _id: userId }, { $set: { name, lastSeenAt: new Date() } }, { upsert: true })
+}
+export async function listStaffPresence(userIds: string[]) {
+  if (!db || !userIds.length) return []
+  return db.collection<StaffPresence>('staff_presence').find({ _id: { $in: userIds } }).toArray()
+}
+export async function listStaffChatMessagesAfter(conversationId: string, userId: string, afterId = '') {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(conversationId)) return null
+  const conversation = await getStaffConversation(conversationId, userId)
+  if (!conversation?._id) return null
+  const filter: Record<string, unknown> = { conversationId: conversation._id }
+  if (afterId && ObjectId.isValid(afterId)) filter._id = { $gt: new ObjectId(afterId) }
+  return db.collection<StaffChatMessage>('staff_chat_messages').find(filter).sort({ _id: 1 }).limit(100).toArray()
+}
+export async function searchStaffChatMessages(conversationId: string, userId: string, query: string) {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const conversation = await getStaffConversation(conversationId, userId)
+  if (!conversation?._id) return null
+  const escaped = query.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\export type GameStatus').slice(0, 80)
+  if (!escaped.trim()) return []
+  return db.collection<StaffChatMessage>('staff_chat_messages').find({ conversationId: conversation._id, body: { $regex: escaped, $options: 'i' } }).sort({ createdAt: -1 }).limit(100).toArray()
+}
+export async function setStaffChatMessagePinned(conversationId: string, messageId: string, userId: string, pinned: boolean): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(conversationId) || !ObjectId.isValid(messageId)) throw new Error('Invalid message.')
+  const conversation = await getStaffConversation(conversationId, userId)
+  if (!conversation?._id) throw new Error('Conversation was not found.')
+  const message = await db.collection<StaffChatMessage>('staff_chat_messages').findOne({ _id: new ObjectId(messageId), conversationId: conversation._id })
+  if (!message) throw new Error('Message was not found.')
+  await db.collection<StaffConversation>('staff_conversations').updateOne({ _id: conversation._id, participantIds: userId }, pinned ? { $addToSet: { pinnedMessageIds: messageId } } : { $pull: { pinnedMessageIds: messageId } })
+}
+export async function updateStaffConversationDetails(conversationId: string, userId: string, input: { title: string; description: string; icon: string }): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(conversationId)) throw new Error('Invalid conversation.')
+  const collection = db.collection<StaffConversation>('staff_conversations')
+  const conversation = await collection.findOne({ _id: new ObjectId(conversationId), participantIds: userId })
+  if (!conversation) throw new Error('Conversation was not found.')
+  if (!conversation.isGroup) throw new Error('Only group conversations have editable details.')
+  if ((conversation.createdBy || conversation.participantIds[0]) !== userId) throw new Error('Only the group creator can edit group details.')
+  const title = input.title.trim().slice(0, 80)
+  if (!title) throw new Error('Group name is required.')
+  await collection.updateOne({ _id: conversation._id }, { $set: { title, description: input.description.trim().slice(0, 240), icon: input.icon.trim().slice(0, 8), updatedAt: new Date() } })
+}
+export async function addStaffConversationMembers(conversationId: string, userId: string, additions: Array<{ id: string; name: string }>): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(conversationId)) throw new Error('Invalid conversation.')
+  const collection = db.collection<StaffConversation>('staff_conversations')
+  const conversation = await collection.findOne({ _id: new ObjectId(conversationId), participantIds: userId })
+  if (!conversation || !conversation.isGroup) throw new Error('Group conversation was not found.')
+  if ((conversation.createdBy || conversation.participantIds[0]) !== userId) throw new Error('Only the group creator can manage members.')
+  const newMembers = additions.filter(item => /^\d+$/.test(item.id) && !conversation.participantIds.includes(item.id))
+  if (!newMembers.length) return
+  if (conversation.participantIds.length + newMembers.length > 20) throw new Error('Groups can have up to 20 members.')
+  const participantNames = { ...(conversation.participantNames || {}) }
+  const updates: Record<string, number> = {}
+  for (const member of newMembers) {
+    participantNames[member.id] = member.name
+    updates['unreadCounts.' + member.id] = 0
+    updates['mentionUnreadCounts.' + member.id] = 0
+  }
+  await collection.updateOne({ _id: conversation._id }, { $addToSet: { participantIds: { $each: newMembers.map(item => item.id) } }, $set: { participantNames, ...updates, updatedAt: new Date() } })
+}
+export async function removeStaffConversationMember(conversationId: string, actorId: string, memberId: string): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(conversationId)) throw new Error('Invalid conversation.')
+  const collection = db.collection<StaffConversation>('staff_conversations')
+  const conversation = await collection.findOne({ _id: new ObjectId(conversationId), participantIds: actorId })
+  if (!conversation || !conversation.isGroup) throw new Error('Group conversation was not found.')
+  if ((conversation.createdBy || conversation.participantIds[0]) !== actorId) throw new Error('Only the group creator can manage members.')
+  if (memberId === (conversation.createdBy || conversation.participantIds[0])) throw new Error('The group creator cannot be removed.')
+  if (!conversation.participantIds.includes(memberId)) throw new Error('That member is not in this group.')
+  const participantIds = conversation.participantIds.filter(id => id !== memberId)
+  if (participantIds.length < 2) throw new Error('A group needs at least two members.')
+  await collection.updateOne({ _id: conversation._id }, { $set: { participantIds, updatedAt: new Date() }, $unset: { ['unreadCounts.' + memberId]: '', ['mentionUnreadCounts.' + memberId]: '', ['lastReadAtByUser.' + memberId]: '' } })
+}
+export async function getStaffChatFile(fileId: string, userId: string) {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const { ObjectId } = await import('mongodb')
+  if (!ObjectId.isValid(fileId)) return null
+  const file = await db.collection<StaffChatStoredFile>('staff_chat_files').findOne({ _id: new ObjectId(fileId) })
+  if (!file) return null
+  const conversation = await getStaffConversation(String(file.conversationId), userId)
+  return conversation ? file : null
 }
 
 export type GameStatus = 'In development' | 'Live' | 'Paused' | 'Archived'
