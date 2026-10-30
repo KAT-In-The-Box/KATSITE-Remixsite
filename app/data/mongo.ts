@@ -262,8 +262,10 @@ export async function removeStaffConversationMember(conversationId: string, acto
   const collection = db.collection<StaffConversation>('staff_conversations')
   const conversation = await collection.findOne({ _id: new ObjectId(conversationId), participantIds: actorId })
   if (!conversation || !conversation.isGroup) throw new Error('Group conversation was not found.')
-  if ((conversation.createdBy || conversation.participantIds[0]) !== actorId) throw new Error('Only the group creator can manage members.')
-  if (memberId === (conversation.createdBy || conversation.participantIds[0])) throw new Error('The group creator cannot be removed.')
+  const creatorId = conversation.createdBy || conversation.participantIds[0]
+  const isSelfLeaving = memberId === actorId
+  if (!isSelfLeaving && creatorId !== actorId) throw new Error('Only the group creator can remove other members.')
+  if (memberId === creatorId) throw new Error('The group creator cannot leave or be removed. Transfer group ownership first.')
   if (!conversation.participantIds.includes(memberId)) throw new Error('That member is not in this group.')
   const participantIds = conversation.participantIds.filter(id => id !== memberId)
   if (participantIds.length < 2) throw new Error('A group needs at least two members.')
