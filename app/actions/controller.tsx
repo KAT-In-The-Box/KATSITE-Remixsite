@@ -292,7 +292,7 @@ export default createController(routes, {
         return new Response(new Uint8Array(file.data), { headers: {
           'Content-Type': file.mimeType,
           'Content-Length': String(file.size),
-          'Content-Disposition': 'attachment; filename="' + filename + '"; filename*=UTF-8\\'\\'' + encodeURIComponent(file.name),
+          'Content-Disposition': 'attachment; filename="' + filename + '"; filename*=UTF-8\'\'' + encodeURIComponent(file.name),
           'X-Content-Type-Options': 'nosniff',
           'Cache-Control': 'private, no-store',
           'Content-Security-Policy': "default-src 'none'; sandbox",
@@ -315,8 +315,8 @@ export default createController(routes, {
       if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
-      const ids = context.formData.getAll('participants').filter((v): v is string => typeof v === 'string' && /^\\d+$/.test(v))
-      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\\d+$/.test(v)))
+      const ids = context.formData.getAll('participants').filter((v): v is string => typeof v === 'string' && /^\d+$/.test(v))
+      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\d+$/.test(v)))
       if (ids.some(id => !allowed.has(id)) || ids.length < 1) return new Response('Choose at least one approved staff member.', { status: 400 })
       const names: Record<string, string> = {}
       try {
@@ -345,7 +345,7 @@ export default createController(routes, {
         await saveStaffChatMessage({
           conversationId: id, senderId: user.id, senderName: user.name, body: readText(context.formData, 'body'),
           replyToId: readText(context.formData, 'replyToId') || undefined,
-          mentions: context.formData.getAll('mentions').filter((v): v is string => typeof v === 'string' && /^\\d+$/.test(v)),
+          mentions: context.formData.getAll('mentions').filter((v): v is string => typeof v === 'string' && /^\d+$/.test(v)),
           attachments,
         })
         return createRedirectResponse('/staff/chats?id=' + encodeURIComponent(id), { status: 303 })
@@ -379,8 +379,8 @@ export default createController(routes, {
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
       const id = readText(context.formData, 'conversationId')
-      const ids = context.formData.getAll('members').filter((v): v is string => typeof v === 'string' && /^\\d+$/.test(v))
-      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\\d+$/.test(v)))
+      const ids = context.formData.getAll('members').filter((v): v is string => typeof v === 'string' && /^\d+$/.test(v))
+      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\d+$/.test(v)))
       if (ids.some(member => !allowed.has(member))) return new Response('Only approved staff can be added.', { status: 400 })
       const names: Record<string, string> = {}
       try {
