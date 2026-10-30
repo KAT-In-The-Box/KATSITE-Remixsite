@@ -172,7 +172,7 @@ export async function saveStaffChatMessage(input: { conversationId: string; send
 export interface StaffChatAttachment { id: string; name: string; mimeType: string; size: number }
 interface StaffChatStoredFile {
   _id: import('mongodb').ObjectId; conversationId: import('mongodb').ObjectId; messageId: import('mongodb').ObjectId;
-  name: string; mimeType: string; size: number; data: Buffer; uploadedBy: string; createdAt: Date
+  name: string; mimeType: string; size: number; data: Buffer | { buffer: Uint8Array; position?: number }; uploadedBy: string; createdAt: Date
 }
 interface StaffPresence { _id: string; name: string; lastSeenAt: Date }
 
