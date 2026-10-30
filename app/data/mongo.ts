@@ -94,7 +94,7 @@ export interface StaffConversation {
   mentionUnreadCounts?: Record<string, number>
   pinnedMessageIds?: string[]
 }
-export async function createStaffConversation(input: { creatorId: string; creatorName: string; participantIds: string[]; participantNames: Record<string,string>; title?: string }): Promise<string> {
+export async function createStaffConversation(input: { creatorId: string; creatorName: string; participantIds: string[]; participantNames: Record<string,string>; title?: string; description?: string; icon?: string }): Promise<string> {
   if (!db) throw new Error('MongoDB is not connected.')
   const ids = [...new Set([input.creatorId, ...input.participantIds])]
   if (ids.length < 2 || ids.length > 20) throw new Error('Choose between 1 and 19 other staff members.')
@@ -103,7 +103,7 @@ export async function createStaffConversation(input: { creatorId: string; creato
   const now = new Date()
   const result = await db.collection<StaffConversation>('staff_conversations').insertOne({
     participantIds: ids, participantNames: { ...input.participantNames, [input.creatorId]: input.creatorName },
-    title, isGroup, createdBy: input.creatorId, description: '', icon: '', unreadCounts: Object.fromEntries(ids.map(id => [id, 0])), mentionUnreadCounts: Object.fromEntries(ids.map(id => [id, 0])), pinnedMessageIds: [], createdAt: now, updatedAt: now,
+    title, isGroup, createdBy: input.creatorId, description: (input.description || '').trim().slice(0, 240), icon: (input.icon || '').trim().slice(0, 8), unreadCounts: Object.fromEntries(ids.map(id => [id, 0])), mentionUnreadCounts: Object.fromEntries(ids.map(id => [id, 0])), pinnedMessageIds: [], createdAt: now, updatedAt: now,
   })
   return String(result.insertedId)
 }
@@ -208,7 +208,7 @@ export async function searchStaffChatMessages(conversationId: string, userId: st
   if (!db) throw new Error('MongoDB is not connected.')
   const conversation = await getStaffConversation(conversationId, userId)
   if (!conversation?._id) return null
-  const escaped = query.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\export type GameStatus').slice(0, 80)
+  const escaped = query.replace(/[.*+?^()|[\]{}$]/g, (character) => '\\' + character).slice(0, 80)
   if (!escaped.trim()) return []
   return db.collection<StaffChatMessage>('staff_chat_messages').find({ conversationId: conversation._id, body: { $regex: escaped, $options: 'i' } }).sort({ createdAt: -1 }).limit(100).toArray()
 }
@@ -269,6 +269,17 @@ export async function removeStaffConversationMember(conversationId: string, acto
   if (participantIds.length < 2) throw new Error('A group needs at least two members.')
   await collection.updateOne({ _id: conversation._id }, { $set: { participantIds, updatedAt: new Date() }, $unset: { ['unreadCounts.' + memberId]: '', ['mentionUnreadCounts.' + memberId]: '', ['lastReadAtByUser.' + memberId]: '' } })
 }
+
+export async function listPinnedStaffChatMessages(conversationId: string, userId: string) {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const conversation = await getStaffConversation(conversationId, userId)
+  if (!conversation?._id || !conversation.pinnedMessageIds?.length) return []
+  const { ObjectId } = await import('mongodb')
+  const ids = conversation.pinnedMessageIds.filter(id => ObjectId.isValid(id)).map(id => new ObjectId(id))
+  if (!ids.length) return []
+  return db.collection<StaffChatMessage>('staff_chat_messages').find({ _id: { $in: ids }, conversationId: conversation._id }).sort({ createdAt: -1 }).toArray()
+}
+
 export async function getStaffChatFile(fileId: string, userId: string) {
   if (!db) throw new Error('MongoDB is not connected.')
   const { ObjectId } = await import('mongodb')
