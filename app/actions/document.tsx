@@ -30,9 +30,8 @@ export function Document(handle: Handle<DocumentProps>) {
           {preloads.map((preloadHref) => (
             <link key={preloadHref} rel="modulepreload" href={preloadHref} />
           ))}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(() => {
+          <script>
+            {`(() => {
                 const init = () => {
                   const pill = document.querySelector('[data-katbox-follow-pill]');
                   if (!pill || pill.dataset.followReady) return;
@@ -66,9 +65,8 @@ export function Document(handle: Handle<DocumentProps>) {
                 };
                 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
                 else init();
-              })();`,
-            }}
-          />
+              })();`}
+          </script>
           <script type="module" src={href}></script>
         </head>
         <body mix={css({ margin: 0 })}>{children}</body>
