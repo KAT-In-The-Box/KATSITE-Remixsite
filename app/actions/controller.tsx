@@ -4,7 +4,7 @@ import { createRedirectResponse } from 'remix/response/redirect'
 import { assets } from '../assets.ts'
 import { config } from '../config.ts'
 import { beginRobloxLogin, endStaffSession, finishRobloxLogin, getStaffSession } from '../auth/roblox.ts'
-import { createManagedGame, deleteManagedGame, hasDb, listManagedGames, moveManagedGame, pingDb, saveContactMessage, updateManagedGameMetadata, updateManagedGameStatus, setFeaturedManagedGame, type GameStatus } from '../data/mongo.ts'
+import { createManagedGame, deleteManagedGame, hasDb, listManagedGames, moveManagedGame, pingDb, saveContactMessage, listContactMessages, updateManagedGameMetadata, updateManagedGameStatus, setFeaturedManagedGame, type GameStatus } from '../data/mongo.ts'
 import { fetchRobloxGame } from '../data/roblox-games.ts'
 import { routes } from '../routes.ts'
 import { CareersPage, GamesPage, HomePage, type ContactValues } from './home-page.tsx'
@@ -30,6 +30,17 @@ function escapeHtml(value: string): string {
   })[char]!)
 }
 
+function contactInboxPage(name: string, messages: Awaited<ReturnType<typeof listContactMessages>>): Response {
+  const cards = messages.map((message) => {
+    const sender = escapeHtml(message.name)
+    const email = escapeHtml(message.email)
+    const body = escapeHtml(message.message)
+    const date = escapeHtml(new Date(message.createdAt).toLocaleString())
+    return '<article class="inbox-card"><header><div><h2>' + sender + '</h2><a href="mailto:' + email + '">' + email + '</a></div><time>' + date + '</time></header><p>' + body + '</p><a class="reply" href="mailto:' + email + '?subject=Re%3A%20Your%20message%20to%20KaTBox">Reply by email ↗</a></article>'
+  }).join('')
+  const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Contact inbox | KaTBox</title><style>body{margin:0;background:#050607;color:#f5f7fb;font:14px/1.6 system-ui,sans-serif}.wrap{max-width:1050px;margin:auto;padding:28px 20px}.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border:1px solid #292d34;border-radius:16px;background:#101216}.nav a{color:#a9c8e8;text-decoration:none;margin-left:18px}.eyebrow{margin-top:42px;color:#a9c8e8;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}h1{font-size:38px;margin:6px 0}.muted,time{color:#98a2b1;font-size:12px}.inbox-card{padding:20px;margin:14px 0;border:1px solid #292d34;border-radius:16px;background:linear-gradient(145deg,#12161c,#0b0d11)}header{display:flex;justify-content:space-between;gap:16px}h2{margin:0 0 3px;font-size:17px}a{color:#a9c8e8}.inbox-card p{white-space:pre-wrap;overflow-wrap:anywhere;color:#d5dce5;margin:18px 0}.reply{display:inline-block;padding:8px 13px;border:1px solid #38404b;border-radius:999px;text-decoration:none;font-size:12px}.empty{padding:28px;border:1px dashed #30343b;border-radius:14px;text-align:center;color:#9aa4b2}@media(max-width:600px){.wrap{padding:14px}header{flex-direction:column}.nav{align-items:flex-start;gap:12px;flex-direction:column}}</style></head><body><main class="wrap"><nav class="nav"><strong>KaTBox · Staff workspace</strong><div><a href="/staff">Overview</a><a href="/staff/games">Game Manager</a><a href="/">Main site</a></div></nav><div class="eyebrow">Staff workspace · ' + escapeHtml(name) + '</div><h1>Contact inbox</h1><p class="muted">Messages submitted through the website contact form · ' + messages.length + ' total</p>' + (cards || '<div class="empty">No messages yet. New contact form submissions will appear here.</div>') + '</main></body></html>'
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+}
 function staffPage(name: string): Response {
   const safeName = escapeHtml(name)
   return new Response(`<!doctype html>
@@ -191,6 +202,13 @@ export default createController(routes, {
 
     async robloxCallback(context) {
       return finishRobloxLogin(context.request)
+    },
+
+    async staffInbox(context) {
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      try { return contactInboxPage(user.name, await listContactMessages()) }
+      catch (error) { console.error('Failed to load contact inbox:', error); return new Response('Inbox unavailable. Check the MongoDB connection.', { status: 503 }) }
     },
 
     async gameManager(context) {
