@@ -48,10 +48,7 @@ export async function pingDb(): Promise<boolean> {
 export async function saveContactMessage(input: Omit<ContactMessage, 'createdAt'>): Promise<void> {
   let doc: ContactMessage = { ...input, createdAt: new Date() }
 
-  if (!db) {
-    console.log('[contact] MongoDB not configured, message not stored:', doc)
-    return
-  }
+  if (!db) throw new Error('Contact inbox is unavailable because MongoDB is not connected.')
 
   await db.collection<ContactMessage>('messages').insertOne(doc)
 }
