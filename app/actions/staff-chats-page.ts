@@ -47,12 +47,14 @@ export async function staffChatsPage(user: { id: string; name: string }, selecte
     return '<a class="chat-item ' + (active && String(active._id) === String(c._id) ? 'selected' : '') + '" data-conversation-id="' + id + '" href="/staff/chats?id=' + id + '"><span class="chat-icon">' + (c.isChannel ? '#' : esc(c.icon || (c.isGroup ? '◈' : '●'))) + '</span><span class="chat-main"><strong>' + esc(c.title || 'Conversation') + '</strong><small>' + esc(preview) + '</small></span><span class="badges">' + (starred ? '<b class="star-mark">★</b>' : '') + (mentions ? '<b class="mention-count">' + mentions + '@</b>' : '') + (unread ? '<b class="unread-count">' + unread + '</b>' : '') + '</span></a>'
   }).join('')
   const favorites = visible.filter(c => starredSet.has(String(c._id)))
-  const channelItems = visible.filter(c => c.isChannel)
-  const directItems = visible.filter(c => !c.isChannel)
+  const channelItems = visible.filter(c => c.isChannel && !starredSet.has(String(c._id)))
+  const directItems = visible.filter(c => !c.isChannel && c.participantIds.length === 2 && !starredSet.has(String(c._id)))
+  const groupItems = visible.filter(c => !c.isChannel && c.participantIds.length > 2 && !starredSet.has(String(c._id)))
   const channelCategories = [...new Set(channelItems.map(c => c.category || 'General'))]
   const conversationItems = [
     favorites.length ? '<div class="rail-section"><div class="rail-heading">★ FAVORITES</div>' + renderItems(favorites) + '</div>' : '',
     ...channelCategories.map(category => '<div class="rail-section"><div class="rail-heading"># ' + esc(category) + '</div>' + renderItems(channelItems.filter(c => (c.category || 'General') === category)) + '</div>'),
+    groupItems.length ? '<div class="rail-section"><div class="rail-heading">GROUP CHATS</div>' + renderItems(groupItems) + '</div>' : '',
     '<div class="rail-section"><div class="rail-heading">DIRECT MESSAGES</div>' + renderItems(directItems) + '</div>',
   ].join('')
   const memberHtml = members.map(m => '<span class="member-chip"><i class="dot ' + (m.seen && Date.now() - new Date(m.seen).getTime() < 120000 ? 'online' : '') + '"></i>' + esc(m.name) + (m.id === user.id ? ' (you)' : '') + '</span>').join('')
