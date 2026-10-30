@@ -123,7 +123,7 @@ export async function setStaffChatPreference(conversationId: string, userId: str
   const add: Record<string, string> = {}, pull: Record<string, string> = {}
   if (input.starred !== undefined) (input.starred ? add : pull).starredConversationIds = conversationId
   if (input.muted !== undefined) (input.muted ? add : pull).mutedConversationIds = conversationId
-  await db.collection<StaffChatPreference>('staff_chat_preferences').updateOne({ _id: userId }, { $setOnInsert: { starredConversationIds: [], mutedConversationIds: [] }, ...(Object.keys(add).length ? { $addToSet: add } : {}), ...(Object.keys(pull).length ? { $pull: pull } : {}) }, { upsert: true })
+  await db.collection<StaffChatPreference>('staff_chat_preferences').updateOne({ _id: userId }, { ...(Object.keys(add).length ? { $addToSet: add } : {}), ...(Object.keys(pull).length ? { $pull: pull } : {}) }, { upsert: true })
 }
 export async function listStaffConversations(userId: string) {
   if (!db) throw new Error('MongoDB is not connected.')
