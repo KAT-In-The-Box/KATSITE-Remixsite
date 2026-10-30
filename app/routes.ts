@@ -11,6 +11,7 @@ export const routes = route({
   robloxCallback: get('/auth/roblox/callback'),
   staff: get('/staff'),
   gameManager: get('/staff/games'),
+  staffInbox: get('/staff/inbox'),
   gameCreate: { method: 'POST', pattern: '/staff/games/create' },
   gameStatus: { method: 'POST', pattern: '/staff/games/status' },
   gameFeature: { method: 'POST', pattern: '/staff/games/feature' },
