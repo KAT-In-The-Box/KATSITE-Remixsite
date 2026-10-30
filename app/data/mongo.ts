@@ -210,7 +210,7 @@ export async function searchStaffChatMessages(conversationId: string, userId: st
   if (!db) throw new Error('MongoDB is not connected.')
   const conversation = await getStaffConversation(conversationId, userId)
   if (!conversation?._id) return null
-  const escaped = query.replace(/[.*+?^()|[\]{}$]/g, (character) => '\\' + character).slice(0, 80)
+  const escaped = [...query].map((character) => '.*+?^${}()|[]\\'.includes(character) ? '\\' + character : character).join('').slice(0, 80)
   if (!escaped.trim()) return []
   return db.collection<StaffChatMessage>('staff_chat_messages').find({ conversationId: conversation._id, body: { $regex: escaped, $options: 'i' } }).sort({ createdAt: -1 }).limit(100).toArray()
 }
