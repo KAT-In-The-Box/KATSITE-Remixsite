@@ -10,7 +10,7 @@ import {
   setFeaturedManagedGame, createStaffConversation, saveStaffChatMessage, listStaffConversations,
   listStaffChatMessagesAfter, getStaffChatFile, markStaffConversationRead, touchStaffPresence,
   setStaffChatMessagePinned, updateStaffConversationDetails, addStaffConversationMembers,
-  removeStaffConversationMember, setStaffChatPreference, type GameStatus,
+  removeStaffConversationMember, setStaffChatPreference, getStaffChatPreferences, listStaffPresence, type GameStatus,
 } from '../data/mongo.ts'
 import { staffChatsPage } from './staff-chats-page.ts'
 import { fetchRobloxGame } from '../data/roblox-games.ts'
@@ -265,14 +265,17 @@ export default createController(routes, {
       const id = url.searchParams.get('id') || ''
       const after = url.searchParams.get('after') || ''
       try {
-        const messages = await listStaffChatMessagesAfter(id, user.id, after)
+        const messages = id ? await listStaffChatMessagesAfter(id, user.id, after) : []
         if (messages === null) return new Response('Not found', { status: 404 })
-        if (messages.length) await markStaffConversationRead(id, user.id)
+        if (id && messages.length) await markStaffConversationRead(id, user.id)
         const conversations = await listStaffConversations(user.id)
-        const currentConversation = conversations.find(c => String(c._id) === id)
+        const currentConversation = id ? conversations.find(c => String(c._id) === id) : undefined
+        const preferences = await getStaffChatPreferences(user.id)
+        const presence = currentConversation ? await listStaffPresence(currentConversation.participantIds) : []
         return Response.json({
           messages: messages.map(m => ({ id: String(m._id), senderId: m.senderId, senderName: m.senderName, body: m.body, replyPreview: m.replyPreview, attachments: m.attachments || [], mentions: m.mentions || [], mentionNames: (m.mentions || []).map(mentionedId => currentConversation?.participantNames[mentionedId] || 'Staff member'), createdAt: m.createdAt })),
-          counts: conversations.map(c => ({ id: String(c._id), unread: c.unreadCounts?.[user.id] || 0, mentions: c.mentionUnreadCounts?.[user.id] || 0 })),
+          counts: conversations.map(c => ({ id: String(c._id), unread: c.unreadCounts?.[user.id] || 0, mentions: c.mentionUnreadCounts?.[user.id] || 0, preview: c.lastMessage || '', sender: c.lastSenderName || '', lastMessageId: c.lastMessageId || '', title: c.title, isChannel: !!c.isChannel, muted: preferences.mutedIds.includes(String(c._id)), starred: preferences.starredIds.includes(String(c._id)) })),
+          presence: presence.map(member => ({ id: member._id, online: Date.now() - new Date(member.lastSeenAt).getTime() < 120000 })),
           totalUnread: conversations.reduce((n, c) => n + (c.unreadCounts?.[user.id] || 0), 0),
           totalMentions: conversations.reduce((n, c) => n + (c.mentionUnreadCounts?.[user.id] || 0), 0),
         }, { headers: { 'Cache-Control': 'no-store' } })
@@ -317,17 +320,21 @@ export default createController(routes, {
       if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
-      const ids = context.formData.getAll('participants').filter((v): v is string => typeof v === 'string' && /^\d+$/.test(v))
+      const selectedIds = context.formData.getAll('participants').filter((v): v is string => typeof v === 'string' && /^\d+$/.test(v))
       const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\d+$/.test(v)))
-      if (ids.some(id => !allowed.has(id)) || ids.length < 1) return new Response('Choose at least one approved staff member.', { status: 400 })
+      const isChannel = readText(context.formData, 'type') === 'channel'
+      if (selectedIds.some(id => !allowed.has(id))) return new Response('Only approved staff can join a chat.', { status: 400 })
+      const ids = isChannel ? [...allowed].filter(id => id !== user.id) : selectedIds
+      if (!isChannel && ids.length < 1) return new Response('Choose at least one approved staff member.', { status: 400 })
+      if (ids.length > 19) return new Response('A channel or group can include up to 20 people including you.', { status: 400 })
       const names: Record<string, string> = {}
       try {
-        const response = await fetch('https://users.roblox.com/v1/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userIds: ids, excludeBannedUsers: true }), signal: AbortSignal.timeout(8000) })
+        const response = await fetch('https://users.roblox.com/v1/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userIds: ids.slice(0, 100), excludeBannedUsers: true }), signal: AbortSignal.timeout(8000) })
         if (response.ok) { const data = await response.json() as { data?: { id: number; name: string; displayName: string }[] }; for (const p of data.data || []) names[String(p.id)] = p.displayName || p.name }
       } catch {}
       for (const id of ids) names[id] = names[id] || 'Staff ' + id
       try {
-        const id = await createStaffConversation({ creatorId: user.id, creatorName: user.name, participantIds: ids, participantNames: names, title: readText(context.formData, 'title'), description: readText(context.formData, 'description'), icon: readText(context.formData, 'icon'), isChannel: readText(context.formData, 'type') === 'channel', category: readText(context.formData, 'category') || 'General' })
+        const id = await createStaffConversation({ creatorId: user.id, creatorName: user.name, participantIds: ids, participantNames: names, title: readText(context.formData, 'title'), description: readText(context.formData, 'description'), icon: readText(context.formData, 'icon'), isChannel, category: readText(context.formData, 'category') || 'General' })
         return createRedirectResponse('/staff/chats?id=' + id, { status: 303 })
       } catch (error) { console.error(error); return new Response(error instanceof Error ? error.message : 'Could not create conversation.', { status: 400 }) }
     },

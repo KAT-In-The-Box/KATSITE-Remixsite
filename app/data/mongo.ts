@@ -86,6 +86,7 @@ export interface StaffConversation {
   createdAt: Date
   updatedAt: Date
   lastMessage?: string
+  lastMessageId?: string
   lastSenderName?: string
   createdBy?: string
   description?: string
@@ -99,7 +100,7 @@ export interface StaffConversation {
 export async function createStaffConversation(input: { creatorId: string; creatorName: string; participantIds: string[]; participantNames: Record<string,string>; title?: string; description?: string; icon?: string; isChannel?: boolean; category?: string }): Promise<string> {
   if (!db) throw new Error('MongoDB is not connected.')
   const ids = [...new Set([input.creatorId, ...input.participantIds])]
-  if (ids.length < 2 || ids.length > 20) throw new Error('Choose between 1 and 19 other staff members.')
+  if ((input.isChannel ? ids.length < 1 : ids.length < 2) || ids.length > 20) throw new Error(input.isChannel ? 'A channel can include up to 20 approved staff members.' : 'Choose between 1 and 19 other staff members.')
   const isChannel = !!input.isChannel
   const isGroup = ids.length > 2 || isChannel
   const title = (input.title || '').trim().slice(0, 80) || (isGroup ? 'Group conversation' : input.participantNames[ids.find(id => id !== input.creatorId)!] || 'Direct message')
@@ -181,7 +182,7 @@ export async function saveStaffChatMessage(input: { conversationId: string; send
     if (allowedMentions.includes(participantId)) inc['mentionUnreadCounts.' + participantId] = 1
   }
   await conversations.updateOne({ _id: conversation._id }, {
-    $set: { lastMessage: body.slice(0, 180) || (attachments.length ? '📎 Attachment' : ''), lastSenderName: input.senderName, updatedAt: now, ['unreadCounts.' + input.senderId]: 0, ['mentionUnreadCounts.' + input.senderId]: 0 },
+    $set: { lastMessage: body.slice(0, 180) || (attachments.length ? '📎 Attachment' : ''), lastMessageId: String(messageId), lastSenderName: input.senderName, updatedAt: now, ['unreadCounts.' + input.senderId]: 0, ['mentionUnreadCounts.' + input.senderId]: 0 },
     ...(Object.keys(inc).length ? { $inc: inc } : {}),
   })
   return String(messageId)
@@ -285,10 +286,9 @@ export async function removeStaffConversationMember(conversationId: string, acto
   const creatorId = conversation.createdBy || conversation.participantIds[0]
   const isSelfLeaving = memberId === actorId
   if (!isSelfLeaving && creatorId !== actorId) throw new Error('Only the group creator can remove other members.')
-  if (memberId === creatorId) throw new Error('The group creator cannot leave or be removed. Transfer group ownership first.')
   if (!conversation.participantIds.includes(memberId)) throw new Error('That member is not in this group.')
   const participantIds = conversation.participantIds.filter(id => id !== memberId)
-  if (participantIds.length < 2) throw new Error('A group needs at least two members.')
+  if (!participantIds.length) throw new Error('A chat must have at least one remaining member.')
   await collection.updateOne({ _id: conversation._id }, { $set: { participantIds, ...(memberId === creatorId ? { createdBy: participantIds[0] } : {}), updatedAt: new Date() }, $unset: { ['unreadCounts.' + memberId]: '', ['mentionUnreadCounts.' + memberId]: '', ['lastReadAtByUser.' + memberId]: '' } })
 }
 
