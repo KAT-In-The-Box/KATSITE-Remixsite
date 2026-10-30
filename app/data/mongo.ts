@@ -271,7 +271,7 @@ export async function removeStaffConversationMember(conversationId: string, acto
   if (!conversation.participantIds.includes(memberId)) throw new Error('That member is not in this group.')
   const participantIds = conversation.participantIds.filter(id => id !== memberId)
   if (participantIds.length < 2) throw new Error('A group needs at least two members.')
-  await collection.updateOne({ _id: conversation._id }, { $set: { participantIds, updatedAt: new Date() }, $unset: { ['unreadCounts.' + memberId]: '', ['mentionUnreadCounts.' + memberId]: '', ['lastReadAtByUser.' + memberId]: '' } })
+  await collection.updateOne({ _id: conversation._id }, { $set: { participantIds, ...(memberId === creatorId ? { createdBy: participantIds[0] } : {}), updatedAt: new Date() }, $unset: { ['unreadCounts.' + memberId]: '', ['mentionUnreadCounts.' + memberId]: '', ['lastReadAtByUser.' + memberId]: '' } })
 }
 
 export async function listPinnedStaffChatMessages(conversationId: string, userId: string) {
