@@ -172,7 +172,7 @@ export async function saveStaffChatMessage(input: { conversationId: string; send
 export interface StaffChatAttachment { id: string; name: string; mimeType: string; size: number }
 interface StaffChatStoredFile {
   _id: import('mongodb').ObjectId; conversationId: import('mongodb').ObjectId; messageId: import('mongodb').ObjectId;
-  name: string; mimeType: string; size: number; data: Buffer; uploadedBy: string; createdAt: Date
+  name: string; mimeType: string; size: number; data: Buffer | { buffer: Uint8Array; position?: number }; uploadedBy: string; createdAt: Date
 }
 interface StaffPresence { _id: string; name: string; lastSeenAt: Date }
 
@@ -200,15 +200,17 @@ export async function listStaffChatMessagesAfter(conversationId: string, userId:
   if (!ObjectId.isValid(conversationId)) return null
   const conversation = await getStaffConversation(conversationId, userId)
   if (!conversation?._id) return null
-  const filter: Record<string, unknown> = { conversationId: conversation._id }
-  if (afterId && ObjectId.isValid(afterId)) filter._id = { $gt: new ObjectId(afterId) }
-  return db.collection<StaffChatMessage>('staff_chat_messages').find(filter).sort({ _id: 1 }).limit(100).toArray()
+  const collection = db.collection<StaffChatMessage>('staff_chat_messages')
+  const filter = afterId && ObjectId.isValid(afterId)
+    ? { conversationId: conversation._id, _id: { $gt: new ObjectId(afterId) } }
+    : { conversationId: conversation._id }
+  return collection.find(filter).sort({ _id: 1 }).limit(100).toArray()
 }
 export async function searchStaffChatMessages(conversationId: string, userId: string, query: string) {
   if (!db) throw new Error('MongoDB is not connected.')
   const conversation = await getStaffConversation(conversationId, userId)
   if (!conversation?._id) return null
-  const escaped = query.replace(/[.*+?^()|[\]{}$]/g, (character) => '\\' + character).slice(0, 80)
+  const escaped = [...query].map((character) => '.*+?^${}()|[]\\'.includes(character) ? '\\' + character : character).join('').slice(0, 80)
   if (!escaped.trim()) return []
   return db.collection<StaffChatMessage>('staff_chat_messages').find({ conversationId: conversation._id, body: { $regex: escaped, $options: 'i' } }).sort({ createdAt: -1 }).limit(100).toArray()
 }
@@ -262,12 +264,14 @@ export async function removeStaffConversationMember(conversationId: string, acto
   const collection = db.collection<StaffConversation>('staff_conversations')
   const conversation = await collection.findOne({ _id: new ObjectId(conversationId), participantIds: actorId })
   if (!conversation || !conversation.isGroup) throw new Error('Group conversation was not found.')
-  if ((conversation.createdBy || conversation.participantIds[0]) !== actorId) throw new Error('Only the group creator can manage members.')
-  if (memberId === (conversation.createdBy || conversation.participantIds[0])) throw new Error('The group creator cannot be removed.')
+  const creatorId = conversation.createdBy || conversation.participantIds[0]
+  const isSelfLeaving = memberId === actorId
+  if (!isSelfLeaving && creatorId !== actorId) throw new Error('Only the group creator can remove other members.')
+  if (memberId === creatorId) throw new Error('The group creator cannot leave or be removed. Transfer group ownership first.')
   if (!conversation.participantIds.includes(memberId)) throw new Error('That member is not in this group.')
   const participantIds = conversation.participantIds.filter(id => id !== memberId)
   if (participantIds.length < 2) throw new Error('A group needs at least two members.')
-  await collection.updateOne({ _id: conversation._id }, { $set: { participantIds, updatedAt: new Date() }, $unset: { ['unreadCounts.' + memberId]: '', ['mentionUnreadCounts.' + memberId]: '', ['lastReadAtByUser.' + memberId]: '' } })
+  await collection.updateOne({ _id: conversation._id }, { $set: { participantIds, ...(memberId === creatorId ? { createdBy: participantIds[0] } : {}), updatedAt: new Date() }, $unset: { ['unreadCounts.' + memberId]: '', ['mentionUnreadCounts.' + memberId]: '', ['lastReadAtByUser.' + memberId]: '' } })
 }
 
 export async function listPinnedStaffChatMessages(conversationId: string, userId: string) {
