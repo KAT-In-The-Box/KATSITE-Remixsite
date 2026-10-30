@@ -90,22 +90,40 @@ export interface StaffConversation {
   createdBy?: string
   description?: string
   icon?: string
+  isChannel?: boolean
+  category?: string
   unreadCounts?: Record<string, number>
   mentionUnreadCounts?: Record<string, number>
   pinnedMessageIds?: string[]
 }
-export async function createStaffConversation(input: { creatorId: string; creatorName: string; participantIds: string[]; participantNames: Record<string,string>; title?: string; description?: string; icon?: string }): Promise<string> {
+export async function createStaffConversation(input: { creatorId: string; creatorName: string; participantIds: string[]; participantNames: Record<string,string>; title?: string; description?: string; icon?: string; isChannel?: boolean; category?: string }): Promise<string> {
   if (!db) throw new Error('MongoDB is not connected.')
   const ids = [...new Set([input.creatorId, ...input.participantIds])]
   if (ids.length < 2 || ids.length > 20) throw new Error('Choose between 1 and 19 other staff members.')
-  const isGroup = ids.length > 2
+  const isChannel = !!input.isChannel
+  const isGroup = ids.length > 2 || isChannel
   const title = (input.title || '').trim().slice(0, 80) || (isGroup ? 'Group conversation' : input.participantNames[ids.find(id => id !== input.creatorId)!] || 'Direct message')
   const now = new Date()
   const result = await db.collection<StaffConversation>('staff_conversations').insertOne({
     participantIds: ids, participantNames: { ...input.participantNames, [input.creatorId]: input.creatorName },
-    title, isGroup, createdBy: input.creatorId, description: (input.description || '').trim().slice(0, 240), icon: (input.icon || '').trim().slice(0, 8), unreadCounts: Object.fromEntries(ids.map(id => [id, 0])), mentionUnreadCounts: Object.fromEntries(ids.map(id => [id, 0])), pinnedMessageIds: [], createdAt: now, updatedAt: now,
+    title, isGroup, isChannel, category: (input.category || 'General').trim().slice(0, 40) || 'General', createdBy: input.creatorId, description: (input.description || '').trim().slice(0, 240), icon: (input.icon || '').trim().slice(0, 8), unreadCounts: Object.fromEntries(ids.map(id => [id, 0])), mentionUnreadCounts: Object.fromEntries(ids.map(id => [id, 0])), pinnedMessageIds: [], createdAt: now, updatedAt: now,
   })
   return String(result.insertedId)
+}
+interface StaffChatPreference { _id: string; starredConversationIds?: string[]; mutedConversationIds?: string[] }
+export async function getStaffChatPreferences(userId: string): Promise<{ starredIds: string[]; mutedIds: string[] }> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const preference = await db.collection<StaffChatPreference>('staff_chat_preferences').findOne({ _id: userId })
+  return { starredIds: preference?.starredConversationIds || [], mutedIds: preference?.mutedConversationIds || [] }
+}
+export async function setStaffChatPreference(conversationId: string, userId: string, input: { starred?: boolean; muted?: boolean }): Promise<void> {
+  if (!db) throw new Error('MongoDB is not connected.')
+  const conversation = await getStaffConversation(conversationId, userId)
+  if (!conversation?._id) throw new Error('Conversation was not found.')
+  const add: Record<string, string> = {}, pull: Record<string, string> = {}
+  if (input.starred !== undefined) (input.starred ? add : pull).starredConversationIds = conversationId
+  if (input.muted !== undefined) (input.muted ? add : pull).mutedConversationIds = conversationId
+  await db.collection<StaffChatPreference>('staff_chat_preferences').updateOne({ _id: userId }, { $setOnInsert: { starredConversationIds: [], mutedConversationIds: [] }, ...(Object.keys(add).length ? { $addToSet: add } : {}), ...(Object.keys(pull).length ? { $pull: pull } : {}) }, { upsert: true })
 }
 export async function listStaffConversations(userId: string) {
   if (!db) throw new Error('MongoDB is not connected.')
