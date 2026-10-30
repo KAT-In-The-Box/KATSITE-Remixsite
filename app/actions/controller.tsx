@@ -289,7 +289,8 @@ export default createController(routes, {
         const file = await getStaffChatFile(id, user.id)
         if (!file) return new Response('File not found.', { status: 404 })
         const filename = file.name.replace(/["\\r\\n]/g, '_')
-        return new Response(new Uint8Array(file.data), { headers: {
+        const fileBytes = Buffer.isBuffer(file.data) ? file.data : Buffer.from(file.data.buffer.subarray(0, file.data.position ?? file.data.buffer.length))
+        return new Response(new Uint8Array(fileBytes), { headers: {
           'Content-Type': file.mimeType,
           'Content-Length': String(file.size),
           'Content-Disposition': 'attachment; filename="' + filename + '"; filename*=UTF-8\'\'' + encodeURIComponent(file.name),
