@@ -57,6 +57,12 @@ export async function saveContactMessage(input: Omit<ContactMessage, 'createdAt'
 }
 
 
+
+export async function listContactMessages() {
+  if (!db) throw new Error('MongoDB is not connected.')
+  return db.collection<ContactMessage & { _id: import('mongodb').ObjectId }>('messages').find({}).sort({ createdAt: -1 }).toArray()
+}
+
 export type GameStatus = 'In development' | 'Live' | 'Paused' | 'Archived'
 
 export interface ManagedGame extends RobloxGameMetadata {
