@@ -408,6 +408,76 @@ function SiteHeader() {
           <a href="/#about" class="hide-sm">About</a>
           <a href="/#contact" class="nav-cta">Get in touch <span aria-hidden="true" mix={css({ marginLeft: '7px', fontSize: '15px', lineHeight: 1 })}>↗</span></a>
         </nav>
+        <details
+          mix={css({
+            display: 'none',
+            position: 'relative',
+            flexShrink: 0,
+            '@media (max-width: 560px)': { display: 'block' },
+            '&[open] summary': { borderColor: 'rgba(190,220,250,.58)', background: 'rgba(169,200,232,.13)' },
+            '&[open] .mobile-menu-icon': { transform: 'rotate(90deg)' },
+          })}
+        >
+          <summary
+            aria-label="Open navigation menu"
+            title="Open navigation menu"
+            mix={css({
+              listStyle: 'none',
+              display: 'grid',
+              placeItems: 'center',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              border: '1px solid rgba(190,211,235,.24)',
+              background: 'rgba(255,255,255,.045)',
+              color: '#f8fbff',
+              cursor: 'pointer',
+              '&::-webkit-details-marker': { display: 'none' },
+            })}
+          >
+            <span class="mobile-menu-icon" aria-hidden="true" mix={css({ fontSize: '21px', lineHeight: 1, transition: 'transform 180ms ease' })}>☰</span>
+          </summary>
+          <nav
+            aria-label="Mobile"
+            mix={css({
+              position: 'absolute',
+              top: 'calc(100% + 12px)',
+              right: 0,
+              width: 'min(250px, calc(100vw - 32px))',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              padding: '10px',
+              borderRadius: '20px',
+              border: '1px solid rgba(190,211,235,.22)',
+              background: 'linear-gradient(145deg, rgba(20,28,41,.98), rgba(6,9,15,.985))',
+              boxShadow: '0 24px 65px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.08)',
+              backdropFilter: 'blur(24px) saturate(145%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(145%)',
+              '& a': {
+                display: 'flex',
+                alignItems: 'center',
+                minHeight: '46px',
+                padding: '0 14px',
+                borderRadius: '12px',
+                color: '#eaf3ff',
+                fontSize: '13px',
+                fontWeight: 700,
+                letterSpacing: '.04em',
+                textDecoration: 'none',
+                textTransform: 'none',
+                transition: 'background 160ms ease, color 160ms ease',
+              },
+              '& a:hover': { background: 'rgba(169,200,232,.12)', color: '#fff' },
+            })}
+          >
+            <a href="/">Home</a>
+            <a href="/games">Our Games</a>
+            <a href="/careers">Careers</a>
+            <a href="/#about">About</a>
+            <a href="/#contact">Contact</a>
+          </nav>
+        </details>
       </div>
     </header>
   )
