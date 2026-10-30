@@ -267,7 +267,7 @@ export default createController(routes, {
       try {
         const messages = await listStaffChatMessagesAfter(id, user.id, after)
         if (messages === null) return new Response('Not found', { status: 404 })
-        await markStaffConversationRead(id, user.id)
+        if (messages.length) await markStaffConversationRead(id, user.id)
         const conversations = await listStaffConversations(user.id)
         return Response.json({
           messages: messages.map(m => ({ id: String(m._id), senderId: m.senderId, senderName: m.senderName, body: m.body, replyPreview: m.replyPreview, attachments: m.attachments || [], createdAt: m.createdAt })),
