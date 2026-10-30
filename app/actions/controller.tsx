@@ -258,7 +258,37 @@ export default createController(routes, {
       return finishRobloxLogin(context.request)
     },
 
-    async staffChats(context) {\n      const user = getStaffSession(context.request)\n      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })\n      try { return await staffChatsPage(user, new URL(context.request.url).searchParams.get('id') || '') }\n      catch (error) { console.error('Failed to load staff chats:', error); return new Response('Team chats unavailable. Check MongoDB.', { status: 503 }) }\n    },\n\n    async staffChatCreate(context) {\n      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })\n      const user = getStaffSession(context.request)\n      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })\n      const ids = context.formData.getAll('participants').filter((v): v is string => typeof v === 'string' && /^\\d+$/.test(v))\n      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\\d+$/.test(v)))\n      if (ids.some(id => !allowed.has(id)) || ids.length < 1) return new Response('Choose at least one approved staff member.', { status: 400 })\n      const names: Record<string,string> = {}\n      try { const response = await fetch('https://users.roblox.com/v1/users', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userIds:ids, excludeBannedUsers:true}), signal:AbortSignal.timeout(8000) }); if(response.ok){ const data=await response.json() as {data?:{id:number,name:string,displayName:string}[]}; for(const p of data.data||[]) names[String(p.id)]=p.displayName || p.name } } catch {}\n      for (const id of ids) names[id] = names[id] || 'Staff ' + id\n      try { const id=await createStaffConversation({creatorId:user.id,creatorName:user.name,participantIds:ids,participantNames:names,title:readText(context.formData,'title')}); return createRedirectResponse('/staff/chats?id='+id,{status:303}) }\n      catch(error){ console.error(error); return new Response(error instanceof Error?error.message:'Could not create conversation.',{status:400}) }\n    },\n\n    async staffChatSend(context) {\n      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })\n      const user = getStaffSession(context.request)\n      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })\n      const id=readText(context.formData,'conversationId')\n      try { await saveStaffChatMessage({conversationId:id,senderId:user.id,senderName:user.name,body:readText(context.formData,'body')}); return createRedirectResponse('/staff/chats?id='+encodeURIComponent(id),{status:303}) }\n      catch(error){ console.error(error); return new Response(error instanceof Error?error.message:'Could not send message.',{status:400}) }\n    },\n\n    async staffInbox(context) {
+    async staffChats(context) {
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      try { return await staffChatsPage(user, new URL(context.request.url).searchParams.get('id') || '') }
+      catch (error) { console.error('Failed to load staff chats:', error); return new Response('Team chats unavailable. Check MongoDB.', { status: 503 }) }
+    },
+
+    async staffChatCreate(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const ids = context.formData.getAll('participants').filter((v): v is string => typeof v === 'string' && /^\d+$/.test(v))
+      const allowed = new Set((process.env.ROBLOX_STAFF_USER_IDS ?? '').split(',').map(v => v.trim()).filter(v => /^\d+$/.test(v)))
+      if (ids.some(id => !allowed.has(id)) || ids.length < 1) return new Response('Choose at least one approved staff member.', { status: 400 })
+      const names: Record<string,string> = {}
+      try { const response = await fetch('https://users.roblox.com/v1/users', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userIds:ids, excludeBannedUsers:true}), signal:AbortSignal.timeout(8000) }); if(response.ok){ const data=await response.json() as {data?:{id:number,name:string,displayName:string}[]}; for(const p of data.data||[]) names[String(p.id)]=p.displayName || p.name } } catch {}
+      for (const id of ids) names[id] = names[id] || 'Staff ' + id
+      try { const id=await createStaffConversation({creatorId:user.id,creatorName:user.name,participantIds:ids,participantNames:names,title:readText(context.formData,'title')}); return createRedirectResponse('/staff/chats?id='+id,{status:303}) }
+      catch(error){ console.error(error); return new Response(error instanceof Error?error.message:'Could not create conversation.',{status:400}) }
+    },
+
+    async staffChatSend(context) {
+      if (!isSameOrigin(context.request)) return new Response('Forbidden', { status: 403 })
+      const user = getStaffSession(context.request)
+      if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
+      const id=readText(context.formData,'conversationId')
+      try { await saveStaffChatMessage({conversationId:id,senderId:user.id,senderName:user.name,body:readText(context.formData,'body')}); return createRedirectResponse('/staff/chats?id='+encodeURIComponent(id),{status:303}) }
+      catch(error){ console.error(error); return new Response(error instanceof Error?error.message:'Could not send message.',{status:400}) }
+    },
+
+    async staffInbox(context) {
       const user = getStaffSession(context.request)
       if (!user) return createRedirectResponse('/auth/roblox/login', { status: 303 })
       try { return contactInboxPage(user.name, await listContactMessages()) }
