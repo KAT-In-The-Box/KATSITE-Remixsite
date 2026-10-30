@@ -18,6 +18,7 @@ export const routes = route({
   staffChatCreate: { method: 'POST', pattern: '/staff/chats/create' },
   staffChatSend: { method: 'POST', pattern: '/staff/chats/send' },
   staffChatPin: { method: 'POST', pattern: '/staff/chats/pin' },
+  staffChatPreference: { method: 'POST', pattern: '/staff/chats/preference' },
   staffChatGroupUpdate: { method: 'POST', pattern: '/staff/chats/group/update' },
   staffChatMemberAdd: { method: 'POST', pattern: '/staff/chats/group/add' },
   staffChatMemberRemove: { method: 'POST', pattern: '/staff/chats/group/remove' },
