@@ -10,7 +10,7 @@ import { routes } from './routes.ts'
 export const router = createRouter({
   middleware: [
     staticFiles('./public', { index: false }),
-    formData({ maxFiles: 0 }),
+    formData({ maxFiles: 5, maxFileSize: 5 * 1024 * 1024, maxParts: 30, maxTotalSize: 13 * 1024 * 1024 }),
     render({ assets }),
   ],
 })
